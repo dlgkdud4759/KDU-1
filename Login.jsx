@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import { auth } from "../Firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore"; 
+import { firestore } from "../Firebase"; 
 import { SvgXml } from 'react-native-svg';
 
 const svgString = `
@@ -23,24 +25,42 @@ const Login = ({ onNavigate, onNavigateToMembership }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleLogin = () => {
-    signInWithEmailAndPassword(auth, email, password)
-      .then(() => {
-        Alert.alert("로그인 성공", "환영합니다!");
-        onNavigate(); // 로그인 성공 시 Information 화면으로 이동
-      })
-      .catch((error) => {
-        Alert.alert("로그인 실패", error.message);
-      });
+  const handleLogin = async () => {
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      Alert.alert("로그인 성공", "환영합니다!");
+  
+      const user = auth.currentUser;
+      console.log("현재 사용자:", user); // 사용자 정보 출력
+      const userDoc = doc(firestore, "users", user.uid);
+      const userSnapshot = await getDoc(userDoc);
+  
+      if (userSnapshot.exists()) {
+        const userData = userSnapshot.data();
+        console.log("사용자 데이터:", userData); // 사용자 데이터 출력
+        console.log("isInfoCompleted:", userData.isInfoCompleted); // isInfoCompleted 값 출력
+  
+        // 사용자 정보 입력 여부에 따라 화면 전환
+        if (userData.isInfoCompleted === true) { // true로 비교
+          onNavigate("Main"); // 정보 입력 완료 시 main 화면으로 이동
+        } else {
+          onNavigate("Information"); // 정보 입력 미완료 시 정보 입력 화면으로 이동
+        }
+      } else {
+        Alert.alert("사용자 정보 없음", "사용자 정보를 찾을 수 없습니다.");
+      }
+    } catch (error) {
+      Alert.alert("로그인 실패", error.message);
+    }
   };
 
-  return (
+   return (
     <View style={styles.login}>
       <View style={styles.inputContainer}>
       <SvgXml xml={svgString} width="24" height="24" style={styles.icon}/>
         <TextInput
           style={styles.input}
-          placeholder="이메일"
+          placeholder="아이디 (이메일)"
           value={email}
           onChangeText={setEmail}
         />
@@ -63,7 +83,6 @@ const Login = ({ onNavigate, onNavigateToMembership }) => {
 
       <Text style={styles.title}>Pet Tracker</Text>
 
-      {/* 회원가입 버튼 */}
       <TouchableOpacity onPress={onNavigateToMembership}>
         <Text style={styles.signupText}>회원가입</Text>
       </TouchableOpacity>
@@ -84,16 +103,11 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     height: 56,
     marginBottom: 20,
-    paddingHorizontal: 10,
+    paddingHorizontal: -3,
     top: 300,
   },
-  icon: {
-    position: 'absolute',
-    top: 20,
-    left: 25,
-    zIndex: 1, // 아이콘이 텍스트 필드 위에 있도록 설정
-  },
   input: {
+    width: 320,
     height: 56,
     borderColor: '#999999',
     borderWidth: 1,
@@ -119,17 +133,15 @@ const styles = StyleSheet.create({
     top: 350,
   },
   loginButtonText: {
-    color: 'rgba(0, 0, 0, 1)',
-    fontFamily: 'Roboto',
     fontSize: 20,
-    fontWeight: '700',
+    color: '#000',
   },
   signupText: {
     fontSize: 12,
     color: '#000',
     textAlign: 'center',
     marginTop: 10,
-    right: 150,
+    right: 140,
     top: 140,
   },
   forgotPasswordText: {
@@ -137,8 +149,14 @@ const styles = StyleSheet.create({
     color: '#000',
     textAlign: 'center',
     left: 110,
-    top: 125,
-  }
+        top: 125,
+  },
+  icon: {
+    position: 'absolute',
+    top: 22,
+    left: 10,
+    zIndex: 1, // 아이콘이 텍스트 필드 위에 있도록 설정
+  },
 });
 
 export default Login;
