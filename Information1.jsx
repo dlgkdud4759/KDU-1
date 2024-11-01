@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert } from 'react-native';
-import { firestore, auth } from '../Firebase'; // Firebase 설정 가져오기
-import { collection, addDoc, doc, updateDoc } from 'firebase/firestore'; // Firestore 관련 함수 임포트
+import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
+import { db } from '../Firebase'; // Firebase 설정 가져오기
+import { collection, addDoc } from 'firebase/firestore'; // Firestore 관련 함수 임포트
 import { SvgXml } from 'react-native-svg';
 
 const svgString = `
@@ -28,6 +28,27 @@ const svgString3 =`
 <path d="M15 19H9" stroke="#292D32" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`;
 
+const svgString4 = `
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_262_605)">
+<path d="M12 0C9.62663 0 7.30655 0.703788 5.33316 2.02236C3.35977 3.34094 1.8217 5.21509 0.913451 7.4078C0.00519943 9.60051 -0.232441 12.0133 0.230582 14.3411C0.693605 16.6689 1.83649 18.8071 3.51472 20.4853C5.19295 22.1635 7.33115 23.3064 9.65892 23.7694C11.9867 24.2324 14.3995 23.9948 16.5922 23.0866C18.7849 22.1783 20.6591 20.6402 21.9776 18.6668C23.2962 16.6935 24 14.3734 24 12C23.9966 8.81846 22.7312 5.76821 20.4815 3.51852C18.2318 1.26883 15.1815 0.00344108 12 0V0ZM17 13H13V17H11V13H7.00001V11H11V7H13V11H17V13Z" fill="#FFE69E"/>
+</g>
+<defs>
+<clipPath id="clip0_262_605">
+<rect width="24" height="24" fill="white"/>
+</clipPath>
+</defs>
+</svg>`;
+
+const svgString5 = `
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M5.45439 9.65383C5.23337 7.54084 4.01341 6.31783 2.61841 6.31783V6.31984C2.53422 6.31975 2.45012 6.32406 2.36641 6.33283C0.869406 6.48681 -0.199579 7.98081 0.0324057 10.2198C0.256421 12.3618 1.55139 13.9998 2.97442 13.9998C3.03887 14 3.10333 13.9966 3.16741 13.9899C4.66741 13.8338 5.68839 11.8898 5.45439 9.65383ZM2.95839 11.9878C2.37381 11.4966 2.09275 10.8078 2.02141 10.0118C2.02141 9.50823 2.01662 9.01136 2.24041 8.56379C2.36476 8.32989 2.51641 8.32581 2.57439 8.31981L2.61859 8.31906C2.95558 8.31906 3.36437 8.89478 3.46539 9.86078C3.53458 10.6132 3.42794 11.386 2.95839 11.9878Z" fill="black"/>
+<path d="M8.46702 8.45002C8.53804 8.45002 8.60802 8.45002 8.67904 8.439C10.326 8.26702 11.452 6.13102 11.1951 3.669C10.9521 1.34602 9.61002 0 8.07604 0C7.98383 9.375e-05 7.89172 0.0050625 7.80003 0.015C6.15205 0.186 4.97404 1.82902 5.23105 4.29202C5.47804 6.648 6.90004 8.45002 8.46702 8.45002ZM7.49104 2.36002C7.59177 2.1615 7.78499 2.02641 8.00605 2.00002C8.02935 1.99856 8.05274 1.99856 8.07604 2.00002C8.54005 2.00002 9.07602 2.64502 9.20605 3.87703C9.29947 4.59361 9.18711 5.32195 8.88205 5.97703C8.70004 6.32203 8.51704 6.44203 8.46707 6.44705C8.21005 6.44705 7.38308 5.63306 7.22005 4.08103C7.1158 3.49317 7.21119 2.88736 7.49104 2.36002Z" fill="black"/>
+<path d="M15.3648 8.439C15.4358 8.44598 15.5068 8.45002 15.5768 8.45002C17.1418 8.45002 18.5668 6.65002 18.8128 4.29202C19.0698 1.82902 17.8918 0.186 16.2458 0.015C16.1538 0.0050625 16.0613 4.6875e-05 15.9688 0C14.4338 0 13.0918 1.34602 12.8488 3.669C12.5918 6.13102 13.7178 8.26898 15.3648 8.439ZM14.8388 3.876C14.9668 2.64502 15.5008 2.00002 15.9688 2.00002C15.9918 1.99852 16.0148 1.99852 16.0378 2.00002C16.2586 2.02617 16.4519 2.16089 16.5528 2.35903C16.8337 2.88605 16.9292 3.49219 16.8238 4.08005C16.6618 5.63203 15.8338 6.44606 15.5728 6.44606C15.5268 6.44606 15.3438 6.32105 15.1618 5.97605C14.8567 5.32097 14.7446 4.59248 14.8388 3.876Z" fill="black"/>
+<path d="M12.0008 11C7.45879 11 3.00079 15.641 2.99479 20.369C2.87081 23.568 5.59481 24.727 8.89481 23.547C10.9066 22.861 13.089 22.861 15.1008 23.547C15.8759 23.8087 16.6837 23.9612 17.5008 24C20.3938 24 21.0008 22.025 21.0008 20.369C21.0008 15.641 16.5428 11 12.0008 11ZM12.0008 21C9.74681 20.643 4.77679 23.833 5.00081 20.369C5.00081 16.719 8.53383 13 12.0008 13C15.4678 13 19.0008 16.7191 19.0008 20.369C19.2268 23.83 14.2658 20.647 12.0008 21Z" fill="black"/>
+<path d="M21.9713 7.39071L21.9708 7.39268C21.8889 7.37313 21.8061 7.35799 21.7226 7.34716C20.2305 7.1516 18.8456 8.35868 18.5547 10.5908C18.2785 12.7267 19.1606 14.6193 20.5452 14.9476C20.608 14.9626 20.6714 14.9742 20.7354 14.9824C22.2309 15.1766 23.6729 13.5207 23.9611 11.291C24.2335 9.18405 23.3286 7.71255 21.9713 7.39071ZM21.978 11.0336C21.8717 11.7815 21.5897 12.5089 20.9939 12.9862C20.5384 12.3733 20.4239 11.6383 20.5381 10.8473C20.6543 10.3573 20.7643 9.87274 21.0852 9.48893C21.2602 9.29004 21.4087 9.32102 21.4665 9.32857L21.5097 9.33809C21.8376 9.4158 22.1026 10.0703 21.978 11.0336Z" fill="black"/>
+</svg>`;
+
 export function Information1({ onBack, onSuccess }) {
   const [petType, setPetType] = useState('');
   const [name, setName] = useState('');
@@ -37,40 +58,20 @@ export function Information1({ onBack, onSuccess }) {
   const [isNeutered, setIsNeutered] = useState('');
 
   const handleConfirm = async () => {
-    // 모든 필드가 입력되었는지 확인
     if (!name || !weight || !birthDate || !petType || !gender || !isNeutered) {
-      Alert.alert("모든 필드를 채워주세요.");
-      return; 
+      alert("모든 필드를 채워주세요.");
+      return; // 입력이 완료되지 않은 경우 함수 종료
     }
 
-    const userId = auth.currentUser.uid;
-
-    // 반려동물 정보 객체 생성
-    const petInfo = { 
-      userId, 
-      petType, 
-      name, 
-      weight, 
-      birthDate, 
-      gender, 
-      isNeutered 
-    };
-
+    const petInfo = { petType, name, weight, birthDate, gender, isNeutered };
     try {
-      // 반려동물 정보 저장
-      const docRef = await addDoc(collection(firestore, 'pets'), petInfo);
+      const docRef = await addDoc(collection(db, 'pets'), petInfo);
       console.log('반려동물 정보가 저장되었습니다:', petInfo, '문서 ID:', docRef.id);
-      Alert.alert("정보가 저장되었습니다.");
-
-      // 사용자의 isInfoCompleted 필드를 true로 업데이트
-      const userDoc = doc(firestore, "users", userId);
-      await updateDoc(userDoc, { isInfoCompleted: true }); // 필드 업데이트
-      console.log("사용자 정보 업데이트 완료: isInfoCompleted가 true로 설정되었습니다.");
-
+      alert("정보가 저장되었습니다.");
+      // 저장 성공 후 Main 화면으로 이동 
       onSuccess(); // Main 화면으로 이동
     } catch (error) {
       console.error('정보 저장 중 오류 발생:', error);
-      Alert.alert("정보 저장 실패", "다시 시도해 주세요.");
     }
   };
 
@@ -80,6 +81,14 @@ export function Information1({ onBack, onSuccess }) {
         <Text style={styles.back}>뒤로가기</Text>
       </TouchableOpacity>
       <Text style={styles.title}>반려동물 정보 입력</Text>
+
+      <View style={styles.profileContainer}>
+      <SvgXml xml={svgString5} width="48" height="48" style={styles.icon3}/>
+      <View style={styles.iconContainer}>
+      <SvgXml xml={svgString4} width="28" height="28" style={styles.icon2}/>
+      </View>
+        <View style={styles.profile}></View>
+      </View>
 
       <View style={styles.petTypeContainer}>
         <Text style={styles.label}>반려종</Text>
@@ -125,20 +134,20 @@ export function Information1({ onBack, onSuccess }) {
 
       <View style={styles.genderContainer}>
         <Text style={styles.label}>반려동물 성별</Text>
-        <SvgXml xml={svgString2} width="24" height="24" style={styles.genderButton}/>
-          <TouchableOpacity
-            style={[styles.genderButton, gender === '남아' && styles.selectedButton]}
-            onPress={() => setGender('남아')}
-          >
-            <Text style={styles.genderButtonText}>남아</Text>
-          </TouchableOpacity>
-        <SvgXml xml={svgString3} width="24" height="24" style={styles.genderButton}/>
-          <TouchableOpacity
-            style={[styles.genderButton, gender === '여아' && styles.selectedButton]}
-            onPress={() => setGender('여아')}
-          >
-            <Text style={styles.genderButtonText}>여아</Text>
-          </TouchableOpacity>
+        <SvgXml xml={svgString2} width="24" height="24" style={styles.icon1}/>
+        <TouchableOpacity
+          style={[styles.genderButton, gender === '남아' && styles.selectedButton]}
+          onPress={() => setGender('남아')}
+        >
+          <Text style={styles.genderButtonText}>남아</Text>
+        </TouchableOpacity>
+        <SvgXml xml={svgString3} width="24" height="24" style={styles.icon1}/>
+        <TouchableOpacity
+          style={[styles.genderButton, gender === '여아' && styles.selectedButton]}
+          onPress={() => setGender('여아')}
+        >
+          <Text style={styles.genderButtonText}>여아</Text>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.neuteringContainer}>
@@ -175,7 +184,38 @@ const styles = StyleSheet.create({
   back: {
         right: 10,
         top: -100,
-        },
+  },
+  profileContainer: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  profile: {
+    width: 84,
+    height: 84,
+    borderRadius: '50',
+    borderWidth: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 40,
+  },
+  iconContainer: {
+    backgroundColor: '#ffffff',
+    top: 90,
+    left: 30,
+    zIndex: 1,
+    width: 32,  // 아이콘의 너비를 설정
+    height: 32, // 아이콘의 높이를 설정
+    borderRadius: 16, // 둥글게 만들기 (높이와 너비의 절반)
+  },
+  icon2: {
+    width: '100%',
+    height: '100%',
+  },
+  icon3: {
+    top: 97,
+    zIndex: 1,
+  },
   petTypeContainer: {
     width: 324,
         height: 46,
@@ -198,7 +238,7 @@ const styles = StyleSheet.create({
     marginLeft: 'auto',
   },
   petTypeButton: {
-    width: 80,
+    width: 90,
        height: 30,
        flexShrink: 0,
        borderBottomLeftRadius: 100,
@@ -211,8 +251,13 @@ const styles = StyleSheet.create({
        backgroundColor: 'rgba(255, 255, 255, 1)',
        justifyContent: 'center',
        alignItems: 'center',
-       marginLeft: 10, // 첫 번째 버튼의 왼쪽 여백을 0으로 설정
+       marginLeft: -20, // 첫 번째 버튼의 왼쪽 여백을 0으로 설정
        right : 10,
+  },
+  icon: {
+    top: 1,
+    left: 5,
+    zIndex: 1, // 아이콘이 텍스트 필드 위에 있도록 설정
   },
   genderContainer: {
     width: 324,
@@ -232,7 +277,7 @@ const styles = StyleSheet.create({
         marginVertical: 10,
   },
   genderButton: {
-   width: 70,
+   width: 80,
        height: 30,
        flexShrink: 0,
        borderBottomLeftRadius: 100,
@@ -245,8 +290,13 @@ const styles = StyleSheet.create({
        backgroundColor: 'rgba(255, 255, 255, 1)',
        justifyContent: 'center',
        alignItems: 'center',
-       marginLeft: 0, // 첫 번째 버튼의 왼쪽 여백을 0으로 설정
-       left: 30,
+       marginLeft: -13, // 첫 번째 버튼의 왼쪽 여백을 0으로 설정
+       left: 40,
+  },
+  icon1: {
+    top: 0,
+    left: 60,
+    zIndex: 1, // 아이콘이 텍스트 필드 위에 있도록 설정
   },
   neuteringContainer: {
 width: 324,
@@ -289,11 +339,13 @@ width: 324,
     color: 'rgba(0, 0, 0, 1)',
     fontFamily: 'Roboto',
     fontSize: 15,
+    left: 15,
   },
   genderButtonText: {
     color: 'rgba(0, 0, 0, 1)',
     fontFamily: 'Roboto',
     fontSize: 15,
+    left: 15,
   },
   neuteringButtonText: {
     color: 'rgba(0, 0, 0, 1)',
@@ -311,7 +363,7 @@ width: 324,
     shadowRadius: 20,
     shadowOffset: { width: 0, height: 4 },
     marginVertical: 10,
-    paddingHorizontal: 10,
+    paddingHorizontal: 25,
   },
   label: {
     width: 70,
@@ -333,7 +385,7 @@ width: 324,
     color: 'rgba(0, 0, 0, 1)',
     fontFamily: 'Roboto',
     fontSize: 20,
-    fontWeight: '500',
+    fontWeight: '900',
   },
   title: {
     color: 'rgba(0, 0, 0, 1)',
@@ -341,10 +393,9 @@ width: 324,
     fontSize: 24,
     fontWeight: '500',
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: -135,
     top: -90,
   },
 });
-
 
 export default Information1;
