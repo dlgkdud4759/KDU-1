@@ -83,7 +83,7 @@ const Login = ({ onNavigate, onNavigateToMembership }) => {
 
       <Text style={styles.title}>Pet Tracker</Text>
 
-      <TouchableOpacity onPress={onNavigateToMembership}>
+      <TouchableOpacity style={styles.signUpButton} onPress={onNavigateToMembership}>
         <Text style={styles.signupText}>회원가입</Text>
       </TouchableOpacity>
 
@@ -136,13 +136,16 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: '#000',
   },
-  signupText: {
-    fontSize: 12,
-    color: '#000',
+  signUpButton: {
     textAlign: 'center',
     marginTop: 10,
     right: 140,
     top: 140,
+  },
+  signupText: {
+    fontSize: 12,
+    color: '#000',
+    textAlign: 'center',
   },
   forgotPasswordText: {
     fontSize: 12,
