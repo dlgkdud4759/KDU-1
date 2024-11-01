@@ -1,32 +1,40 @@
-// src/components/Membership.jsx
 import React, { useState } from "react";
 import { View, TextInput, TouchableOpacity, Text, StyleSheet, Alert } from "react-native";
 import { auth } from "../Firebase"; // 경로 수정
 import { createUserWithEmailAndPassword } from "firebase/auth"; // auth에서 가져오기
+import { setDoc, doc } from "firebase/firestore"; // Firestore에서 setDoc과 doc을 임포트
+import { firestore } from "../Firebase"; // Firestore 설정을 임포트
 
 const Membership = ({ onBack }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const handleSignUp = () => {
+  const handleSignUp = async () => {
     if (password !== confirmPassword) {
       Alert.alert("비밀번호가 일치하지 않습니다.");
       return;
     }
 
-    createUserWithEmailAndPassword(auth, email, password)
-      .then(() => {
-        Alert.alert("회원가입 성공!", "회원가입이 완료되었습니다.", [
-          {
-            text: "확인",
-            onPress: onBack, // 로그인 화면으로 돌아가기
-          },
-        ]);
-      })
-      .catch((error) => {
-        Alert.alert("회원가입 실패", error.message);
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      // Firestore에 사용자 정보 저장
+      await setDoc(doc(firestore, "users", user.uid), {
+        email: user.email,
+        isInfoCompleted: false, // 정보 입력이 완료되지 않았음을 나타냄
       });
+
+      Alert.alert("회원가입 성공!", "회원가입이 완료되었습니다.", [
+        {
+          text: "확인",
+          onPress: onBack, // 로그인 화면으로 돌아가기
+        },
+      ]);
+    } catch (error) {
+      Alert.alert("회원가입 실패", error.message);
+    }
   };
 
   return (
@@ -85,23 +93,24 @@ const styles = StyleSheet.create({
     fontSize: 40,
     color: '#000',
     marginBottom: 20,
-    padding: 20,
   },
   inputContainer: {
     backgroundColor: '#ffffff',
     borderColor: '#999999',
     borderWidth: 1,
     borderRadius: 10,
-    height: 56,
+    height: 66,
     width: 360,
     marginVertical: 5,
     paddingHorizontal: 10,
+    marginBottom: 20,
   },
   input: {
-    height: 54,
+    flex: 1,
     borderRadius: 10,
     backgroundColor: '#ffffff',
     paddingLeft: 10,
+    textAlignVertical: 'center', // 글씨를 수직 중앙 정렬
   },
   signupButton: {
     width: 364,
@@ -110,13 +119,11 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 56,
+    marginTop: 20,
   },
   signupText: {
-    color: 'rgba(0, 0, 0, 1)',
-    fontFamily: 'Roboto',
     fontSize: 20,
-    fontWeight: '900',
+    color: '#000000',
   },
   backText: {
     fontSize: 16,
