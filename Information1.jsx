@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TextInput, Modal, Image, TouchableOpacity } from 'react-native';
 import { db } from '../Firebase'; // Firebase 설정 가져오기
 import { collection, addDoc } from 'firebase/firestore'; // Firestore 관련 함수 임포트
 import { SvgXml } from 'react-native-svg';
+import ProfileImageUploader from './ProfileImageUploader';
 
 const svgString = `
 <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -56,6 +57,13 @@ export function Information1({ onBack, onSuccess }) {
   const [birthDate, setBirthDate] = useState('');
   const [gender, setGender] = useState('');
   const [isNeutered, setIsNeutered] = useState('');
+  const [profileImage, setProfileImage] = useState(null); // 프로필 이미지 상태 추가
+  const [showImageUploader, setShowImageUploader] = useState(false); // 이미지 업로더 표시 상태 추가
+
+  const handleImageUploaded = (url) => {
+    setProfileImage(url); // 업로드된 이미지 URL 저장
+    setShowImageUploader(false); // 업로더 숨기기
+  };
 
   const handleConfirm = async () => {
     if (!name || !weight || !birthDate || !petType || !gender || !isNeutered) {
@@ -63,7 +71,7 @@ export function Information1({ onBack, onSuccess }) {
       return; // 입력이 완료되지 않은 경우 함수 종료
     }
 
-    const petInfo = { petType, name, weight, birthDate, gender, isNeutered };
+    const petInfo = { petType, name, weight, birthDate, gender, isNeutered, profileImage };
     try {
       const docRef = await addDoc(collection(db, 'pets'), petInfo);
       console.log('반려동물 정보가 저장되었습니다:', petInfo, '문서 ID:', docRef.id);
@@ -85,10 +93,20 @@ export function Information1({ onBack, onSuccess }) {
       <View style={styles.profileContainer}>
       <SvgXml xml={svgString5} width="48" height="48" style={styles.icon3}/>
       <View style={styles.iconContainer}>
+      <TouchableOpacity onPress={() => setShowImageUploader(true)}>
       <SvgXml xml={svgString4} width="28" height="28" style={styles.icon2}/>
+      </TouchableOpacity>
       </View>
-        <View style={styles.profile}></View>
+        <View style={styles.profile}>
+          {profileImage && (
+            <Image source={{ uri: profileImage }} style={styles.imagePreview} />
+          )}
+        </View>
       </View>
+
+      <Modal visible={showImageUploader} animationType="slide">
+        <ProfileImageUploader onImageUploaded={handleImageUploaded} />
+      </Modal>
 
       <View style={styles.petTypeContainer}>
         <Text style={styles.label}>반려종</Text>
@@ -212,6 +230,12 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
+  imagePreview: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    marginTop: 10,
+  },
   icon3: {
     top: 97,
     zIndex: 1,
@@ -299,7 +323,7 @@ const styles = StyleSheet.create({
     zIndex: 1, // 아이콘이 텍스트 필드 위에 있도록 설정
   },
   neuteringContainer: {
-width: 324,
+    width: 324,
     height: 46,
     borderRadius: 10,
     borderWidth: 1,
