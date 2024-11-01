@@ -8,22 +8,22 @@ import Information2 from './src/components/Information2';
 import Main from './src/components/Main';  
 
 export default function App() {
-  const [currentScreen, setCurrentScreen] = useState("login");
+  const [currentScreen, setCurrentScreen] = useState("Login");
 
-  const handleLoginNavigation = () => {
-    setCurrentScreen("information");
+  const handleLoginNavigation = (screen) => {
+    setCurrentScreen(screen); // 로그인 후 받은 화면으로 이동
   };
 
   const handleSignupNavigation = () => {
-    setCurrentScreen("membership");
+    setCurrentScreen("Membership");
   };
 
   const handleBackToLogin = () => {
-    setCurrentScreen("login");
+    setCurrentScreen("Login");
   };
 
   const handleBackToInformation = () => {
-    setCurrentScreen("information");
+    setCurrentScreen("Information");
   };
 
   const handleNavigate = (screen) => {
@@ -31,32 +31,32 @@ export default function App() {
   };
 
   const handleInformation1Navigation = () => {
-    setCurrentScreen("information1");
+    setCurrentScreen("Information1");
   };
 
   const handleInformation2Navigation = () => {
-    setCurrentScreen("information2");
+    setCurrentScreen("Information2");
   };
 
   const handleMainNavigation = () => {
-    setCurrentScreen("main");
+    setCurrentScreen("Main");
   };
 
   return (
     <View style={styles.container}>
-      {currentScreen === "login" && (
+      {currentScreen === "Login" && (
         <Login
-          onNavigate={handleLoginNavigation}
+          onNavigate={handleLoginNavigation} // 화면 전환 함수 수정
           onNavigateToMembership={handleSignupNavigation}
         />
       )}
-      {currentScreen === "information" && (
+      {currentScreen === "Information" && (
         <Information
           onNavigate={handleNavigate}
           onNavigateToInformation1={handleInformation1Navigation}
         />
       )}
-      {currentScreen === "membership" && (
+      {currentScreen === "Membership" && (
         <Membership onBack={handleBackToLogin} />
       )}
       {currentScreen === "information1" && (
@@ -65,13 +65,13 @@ export default function App() {
           onSuccess={handleMainNavigation} // 성공 시 Main으로 이동
         />
       )}
-      {currentScreen === "information2" && (
+      {currentScreen === "Information2" && (
         <Information2
           onBack={handleBackToInformation}
           onNavigate={handleMainNavigation}
         />
       )}
-      {currentScreen === "main" && (
+      {currentScreen === "Main" && (
         <Main />
       )}
     </View>
