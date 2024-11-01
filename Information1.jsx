@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
-import { db } from '../Firebase'; // Firebase 설정 가져오기
-import { collection, addDoc } from 'firebase/firestore'; // Firestore 관련 함수 임포트
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { firestore, auth } from '../Firebase'; // Firebase 설정 가져오기
+import { collection, addDoc, doc, updateDoc } from 'firebase/firestore'; // Firestore 관련 함수 임포트
 import { SvgXml } from 'react-native-svg';
 
 const svgString = `
@@ -28,8 +28,6 @@ const svgString3 =`
 <path d="M15 19H9" stroke="#292D32" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`;
 
-
-
 export function Information1({ onBack, onSuccess }) {
   const [petType, setPetType] = useState('');
   const [name, setName] = useState('');
@@ -39,20 +37,40 @@ export function Information1({ onBack, onSuccess }) {
   const [isNeutered, setIsNeutered] = useState('');
 
   const handleConfirm = async () => {
+    // 모든 필드가 입력되었는지 확인
     if (!name || !weight || !birthDate || !petType || !gender || !isNeutered) {
-      alert("모든 필드를 채워주세요.");
-      return; // 입력이 완료되지 않은 경우 함수 종료
+      Alert.alert("모든 필드를 채워주세요.");
+      return; 
     }
 
-    const petInfo = { petType, name, weight, birthDate, gender, isNeutered };
+    const userId = auth.currentUser.uid;
+
+    // 반려동물 정보 객체 생성
+    const petInfo = { 
+      userId, 
+      petType, 
+      name, 
+      weight, 
+      birthDate, 
+      gender, 
+      isNeutered 
+    };
+
     try {
-      const docRef = await addDoc(collection(db, 'pets'), petInfo);
+      // 반려동물 정보 저장
+      const docRef = await addDoc(collection(firestore, 'pets'), petInfo);
       console.log('반려동물 정보가 저장되었습니다:', petInfo, '문서 ID:', docRef.id);
-      alert("정보가 저장되었습니다.");
-      // 저장 성공 후 Main 화면으로 이동 
+      Alert.alert("정보가 저장되었습니다.");
+
+      // 사용자의 isInfoCompleted 필드를 true로 업데이트
+      const userDoc = doc(firestore, "users", userId);
+      await updateDoc(userDoc, { isInfoCompleted: true }); // 필드 업데이트
+      console.log("사용자 정보 업데이트 완료: isInfoCompleted가 true로 설정되었습니다.");
+
       onSuccess(); // Main 화면으로 이동
     } catch (error) {
       console.error('정보 저장 중 오류 발생:', error);
+      Alert.alert("정보 저장 실패", "다시 시도해 주세요.");
     }
   };
 
@@ -107,20 +125,20 @@ export function Information1({ onBack, onSuccess }) {
 
       <View style={styles.genderContainer}>
         <Text style={styles.label}>반려동물 성별</Text>
-        <SvgXml xml={svgString2} width="24" height="24" style={styles.icon1}/>
-        <TouchableOpacity
-          style={[styles.genderButton, gender === '남아' && styles.selectedButton]}
-          onPress={() => setGender('남아')}
-        >
-          <Text style={styles.genderButtonText}>남아</Text>
-        </TouchableOpacity>
-        <SvgXml xml={svgString3} width="24" height="24" style={styles.icon1}/>
-        <TouchableOpacity
-          style={[styles.genderButton, gender === '여아' && styles.selectedButton]}
-          onPress={() => setGender('여아')}
-        >
-          <Text style={styles.genderButtonText}>여아</Text>
-        </TouchableOpacity>
+        <SvgXml xml={svgString2} width="24" height="24" style={styles.genderButton}/>
+          <TouchableOpacity
+            style={[styles.genderButton, gender === '남아' && styles.selectedButton]}
+            onPress={() => setGender('남아')}
+          >
+            <Text style={styles.genderButtonText}>남아</Text>
+          </TouchableOpacity>
+        <SvgXml xml={svgString3} width="24" height="24" style={styles.genderButton}/>
+          <TouchableOpacity
+            style={[styles.genderButton, gender === '여아' && styles.selectedButton]}
+            onPress={() => setGender('여아')}
+          >
+            <Text style={styles.genderButtonText}>여아</Text>
+          </TouchableOpacity>
       </View>
 
       <View style={styles.neuteringContainer}>
@@ -180,7 +198,7 @@ const styles = StyleSheet.create({
     marginLeft: 'auto',
   },
   petTypeButton: {
-    width: 90,
+    width: 80,
        height: 30,
        flexShrink: 0,
        borderBottomLeftRadius: 100,
@@ -193,13 +211,8 @@ const styles = StyleSheet.create({
        backgroundColor: 'rgba(255, 255, 255, 1)',
        justifyContent: 'center',
        alignItems: 'center',
-       marginLeft: -20, // 첫 번째 버튼의 왼쪽 여백을 0으로 설정
+       marginLeft: 10, // 첫 번째 버튼의 왼쪽 여백을 0으로 설정
        right : 10,
-  },
-  icon: {
-    top: 1,
-    left: 5,
-    zIndex: 1, // 아이콘이 텍스트 필드 위에 있도록 설정
   },
   genderContainer: {
     width: 324,
@@ -219,7 +232,7 @@ const styles = StyleSheet.create({
         marginVertical: 10,
   },
   genderButton: {
-   width: 80,
+   width: 70,
        height: 30,
        flexShrink: 0,
        borderBottomLeftRadius: 100,
@@ -232,13 +245,8 @@ const styles = StyleSheet.create({
        backgroundColor: 'rgba(255, 255, 255, 1)',
        justifyContent: 'center',
        alignItems: 'center',
-       marginLeft: -13, // 첫 번째 버튼의 왼쪽 여백을 0으로 설정
-       left: 40,
-  },
-  icon1: {
-    top: 0,
-    left: 60,
-    zIndex: 1, // 아이콘이 텍스트 필드 위에 있도록 설정
+       marginLeft: 0, // 첫 번째 버튼의 왼쪽 여백을 0으로 설정
+       left: 30,
   },
   neuteringContainer: {
 width: 324,
@@ -281,13 +289,11 @@ width: 324,
     color: 'rgba(0, 0, 0, 1)',
     fontFamily: 'Roboto',
     fontSize: 15,
-    left: 15,
   },
   genderButtonText: {
     color: 'rgba(0, 0, 0, 1)',
     fontFamily: 'Roboto',
     fontSize: 15,
-    left: 15,
   },
   neuteringButtonText: {
     color: 'rgba(0, 0, 0, 1)',
@@ -305,7 +311,7 @@ width: 324,
     shadowRadius: 20,
     shadowOffset: { width: 0, height: 4 },
     marginVertical: 10,
-    paddingHorizontal: 25,
+    paddingHorizontal: 10,
   },
   label: {
     width: 70,
@@ -327,7 +333,7 @@ width: 324,
     color: 'rgba(0, 0, 0, 1)',
     fontFamily: 'Roboto',
     fontSize: 20,
-    fontWeight: '900',
+    fontWeight: '500',
   },
   title: {
     color: 'rgba(0, 0, 0, 1)',
@@ -339,5 +345,6 @@ width: 324,
     top: -90,
   },
 });
+
 
 export default Information1;
