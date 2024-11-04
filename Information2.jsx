@@ -17,8 +17,7 @@ const svgString2 =`
 <path d="M9.74996 19.34C10.1139 19.7544 10.0737 20.3852 9.65996 20.75C9.24556 21.114 8.61471 21.0737 8.24996 20.66L0.249955 11.66C-0.0816908 11.2825 -0.0816908 10.7175 0.249955 10.34L8.24996 1.34C8.48059 1.05366 8.84975 0.916976 9.21124 0.984074C9.57274 1.05117 9.86826 1.31123 9.98078 1.66126C10.0933 2.01129 10.0047 2.39484 9.74996 2.66L2.33996 11L9.74996 19.34Z" fill="#111111"/>
 </svg>`;
 
-
-export function Information2({ onBack, onNavigate }) { // onBack 추가
+export function Information2({ navigation }) { // navigation prop 추가
   const [selectedAnimal, setSelectedAnimal] = useState(null); // 선택된 동물 상태 관리
 
   const handleAnimalSelect = (animal) => {
@@ -27,14 +26,14 @@ export function Information2({ onBack, onNavigate }) { // onBack 추가
 
   const handleSignup = () => {
     if (selectedAnimal) {
-      onNavigate('main'); // 선택된 동물이 있을 때 Main으로 이동
+      navigation.navigate('Main'); // 선택된 동물이 있을 때 Main으로 이동
     } else {
-      alert('반려동물을 선택해 주세요.'); // 선택하지 않았을 때 알림
+      Alert.alert('알림', '반려동물을 선택해 주세요.'); // 선택하지 않았을 때 알림
     }
   };
 
   const handleGoBack = () => {
-    onBack(); // 이전 화면으로 이동
+    navigation.goBack(); // 이전 화면으로 이동
   };
 
   return (
@@ -44,12 +43,12 @@ export function Information2({ onBack, onNavigate }) { // onBack 추가
       </TouchableOpacity>
 
       <Text style={styles.info}>
-      <Text style={styles.infoText}>
-        {`입양 예정인 반려동물을 선택해 주세요.\n`}
-      </Text>
-      <Text style={styles.infoText1}>
-        {`선택하신 정보는 회원가입 후 마이페이지에서\n변경하실 수 있습니다.`}
-      </Text>
+        <Text style={styles.infoText}>
+          {`입양 예정인 반려동물을 선택해 주세요.\n`}
+        </Text>
+        <Text style={styles.infoText1}>
+          {`선택하신 정보는 회원가입 후 마이페이지에서\n변경하실 수 있습니다.`}
+        </Text>
       </Text>
 
       <View style={styles.animalSelectionContainer}>
@@ -66,7 +65,7 @@ export function Information2({ onBack, onNavigate }) { // onBack 추가
           style={[styles.animalBox, selectedAnimal === '고양이' && styles.selectedBox]}
           onPress={() => handleAnimalSelect('고양이')}
         >
-        <SvgXml xml={svgString} width="64" height="64" style={styles.icon}/>
+          <SvgXml xml={svgString} width="64" height="64" style={styles.icon}/>
           <Text style={styles.animalText}>고양이</Text>
           <Text style={styles.animalText1}>고양이 등록</Text>
         </TouchableOpacity>
@@ -91,19 +90,28 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 40,
     left: 20,
+    backgroundColor: 'rgba(255,255, 255, 255)',
     padding: 10,
     borderRadius: 5,
+  },
+  backButtonText: {
+    color: 'rgba(0, 0, 0, 1)',
+    fontFamily: 'Roboto',
+    fontSize: 16,
+    fontWeight: '600',
   },
   info: {
     textAlign: 'left',
     marginBottom: 40,
   },
   infoText: {
-    color: '#111111',
+    color: 'rgba(1, 1, 1, 1)',
     fontFamily: 'Roboto',
-    fontSize: 20,
-    fontWeight: '600',
+    fontSize: 18,
+    fontWeight: '900',
     lineHeight: 28,
+    textAlign: 'center',
+    marginBottom: 40,
   },
   infoText1: {
     color: '#999999',
@@ -115,33 +123,32 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   animalBox: {
-    width: 140,
+    width: 130,
     height: 180,
     borderRadius: 10,
     backgroundColor: 'rgba(241, 241, 245, 1)',
     justifyContent: 'center',
     alignItems: 'center',
-    marginHorizontal: 10,
+    marginHorizontal: 15,
   },
   selectedBox: {
     backgroundColor: 'rgba(200, 200, 255, 1)', // 선택된 동물은 색을 변경
   },
   icon: {
-    marginBottom: 16,
+    marginBottom: 8,
   },
   animalText: {
     color: 'rgba(0, 0, 0, 1)',
     fontFamily: 'Roboto',
     fontSize: 20,
     fontWeight: '600',
-    marginBottom: 6,
   },
   animalText1: {
     color: '#999999',
     fontsize: 10,
   },
   group34: {
-    width: 364,
+    width: 324,
     height: 56,
     borderRadius: 10,
     backgroundColor: 'rgba(255, 230, 158, 1)',
@@ -152,8 +159,9 @@ const styles = StyleSheet.create({
   buttonText: {
     color: 'rgba(0, 0, 0, 1)',
     fontFamily: 'Roboto',
-    fontSize: 20,
-    fontWeight: '600',
+    fontSize: 18,
+    fontWeight: '900',
+    top: -4,
   },
 });
 

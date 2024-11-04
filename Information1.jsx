@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, Modal, Image, TouchableOpacity } from 'react-native';
-import { db } from '../Firebase'; // Firebase 설정 가져오기
-import { collection, addDoc } from 'firebase/firestore'; // Firestore 관련 함수 임포트
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, Modal, Image } from 'react-native';
+import { firestore, auth } from '../Firebase'; // Firebase 설정 가져오기
+import { collection, addDoc, doc, updateDoc } from 'firebase/firestore'; // Firestore 관련 함수 임포트
 import { SvgXml } from 'react-native-svg';
 import ProfileImageUploader from './ProfileImageUploader';
 
@@ -28,7 +28,6 @@ const svgString3 =`
 <path d="M12 16V22" stroke="#292D32" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 <path d="M15 19H9" stroke="#292D32" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`;
-
 const svgString4 = `
 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g clip-path="url(#clip0_262_605)">
@@ -50,7 +49,12 @@ const svgString5 = `
 <path d="M21.9713 7.39071L21.9708 7.39268C21.8889 7.37313 21.8061 7.35799 21.7226 7.34716C20.2305 7.1516 18.8456 8.35868 18.5547 10.5908C18.2785 12.7267 19.1606 14.6193 20.5452 14.9476C20.608 14.9626 20.6714 14.9742 20.7354 14.9824C22.2309 15.1766 23.6729 13.5207 23.9611 11.291C24.2335 9.18405 23.3286 7.71255 21.9713 7.39071ZM21.978 11.0336C21.8717 11.7815 21.5897 12.5089 20.9939 12.9862C20.5384 12.3733 20.4239 11.6383 20.5381 10.8473C20.6543 10.3573 20.7643 9.87274 21.0852 9.48893C21.2602 9.29004 21.4087 9.32102 21.4665 9.32857L21.5097 9.33809C21.8376 9.4158 22.1026 10.0703 21.978 11.0336Z" fill="black"/>
 </svg>`;
 
-export function Information1({ onBack, onSuccess }) {
+const svgString6 =`
+<svg width="11" height="21" viewBox="0 0 11 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M9.74996 19.34C10.1139 19.7544 10.0737 20.3852 9.65996 20.75C9.24556 21.114 8.61471 21.0737 8.24996 20.66L0.249955 11.66C-0.0816908 11.2825 -0.0816908 10.7175 0.249955 10.34L8.24996 1.34C8.48059 1.05366 8.84975 0.916976 9.21124 0.984074C9.57274 1.05117 9.86826 1.31123 9.98078 1.66126C10.0933 2.01129 10.0047 2.39484 9.74996 2.66L2.33996 11L9.74996 19.34Z" fill="#111111"/>
+</svg>`;
+
+export function Information1({ navigation }) {
   const [petType, setPetType] = useState('');
   const [name, setName] = useState('');
   const [weight, setWeight] = useState('');
@@ -66,52 +70,71 @@ export function Information1({ onBack, onSuccess }) {
   };
 
   const handleConfirm = async () => {
+    // 모든 필드가 입력되었는지 확인
     if (!name || !weight || !birthDate || !petType || !gender || !isNeutered) {
-      alert("모든 필드를 채워주세요.");
-      return; // 입력이 완료되지 않은 경우 함수 종료
+      Alert.alert("모든 필드를 채워주세요.");
+      return; 
     }
 
-    const petInfo = { petType, name, weight, birthDate, gender, isNeutered, profileImage };
+    const userId = auth.currentUser.uid;
+
+    // 반려동물 정보 객체 생성
+    const petInfo = { 
+      userId, 
+      petType, 
+      name, 
+      weight, 
+      birthDate, 
+      gender, 
+      isNeutered 
+    };
+
     try {
-      const docRef = await addDoc(collection(db, 'pets'), petInfo);
+      // 반려동물 정보 저장
+      const docRef = await addDoc(collection(firestore, 'pets'), petInfo);
       console.log('반려동물 정보가 저장되었습니다:', petInfo, '문서 ID:', docRef.id);
-      alert("정보가 저장되었습니다.");
-      // 저장 성공 후 Main 화면으로 이동 
-      onSuccess(); // Main 화면으로 이동
+      Alert.alert("정보가 저장되었습니다.");
+
+      // 사용자의 isInfoCompleted 필드를 true로 업데이트
+      const userDoc = doc(firestore, "users", userId);
+      await updateDoc(userDoc, { isInfoCompleted: true }); // 필드 업데이트
+      console.log("사용자 정보 업데이트 완료: isInfoCompleted가 true로 설정되었습니다.");
+
+      navigation.navigate('Main'); // Main 화면으로 이동
     } catch (error) {
       console.error('정보 저장 중 오류 발생:', error);
+      Alert.alert("정보 저장 실패", "다시 시도해 주세요.");
     }
   };
 
   return (
     <View style={styles.root}>
-      <TouchableOpacity style={styles.backButton} onPress={onBack}>
-        <Text style={styles.back}>뒤로가기</Text>
+      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+        <SvgXml xml={svgString6} width="24" height="24" style={styles.icon1}/>
       </TouchableOpacity>
       <Text style={styles.title}>반려동물 정보 입력</Text>
 
       <View style={styles.profileContainer}>
-      <SvgXml xml={svgString5} width="48" height="48" style={styles.icon3}/>
-      <View style={styles.iconContainer}>
-      <TouchableOpacity onPress={() => setShowImageUploader(true)}>
-      <SvgXml xml={svgString4} width="28" height="28" style={styles.icon2}/>
-      </TouchableOpacity>
-      </View>
-        <View style={styles.profile}>
-          {profileImage && (
-            <Image source={{ uri: profileImage }} style={styles.imagePreview} />
-          )}
+        <SvgXml xml={svgString5} width="48" height="48" style={styles.icon3}/>
+        <View style={styles.iconContainer}>
+          <TouchableOpacity onPress={() => setShowImageUploader(true)}>
+            <SvgXml xml={svgString4} width="28" height="28" style={styles.icon2}/>
+          </TouchableOpacity>
         </View>
+        <View style={styles.profile}></View>
+        {profileImage && (
+          <Image source={{ uri: profileImage }} style={styles.imagePreview} />
+        )}
       </View>
 
       <Modal visible={showImageUploader} animationType="slide">
-        <ProfileImageUploader onImageUploaded={handleImageUploaded} />
-      </Modal>
+  <ProfileImageUploader onImageUploaded={handleImageUploaded} setShowImageUploader={setShowImageUploader} />
+</Modal>
 
       <View style={styles.petTypeContainer}>
         <Text style={styles.label}>반려종</Text>
         <View style={styles.petTypeSelection}>
-        <SvgXml xml={svgString} width="28" height="28" style={styles.icon}/>
+          <SvgXml xml={svgString} width="28" height="28" style={styles.icon}/>
           <TouchableOpacity
             style={[styles.petTypeButton, petType === '강아지' && styles.selectedButton]}
             onPress={() => setPetType('강아지')}
@@ -146,20 +169,21 @@ export function Information1({ onBack, onSuccess }) {
       <TextInput
         style={styles.rectangle}
         placeholder="반려동물 생년월일(예: 010825)"
+        keyboardType="numeric"
         onChangeText={setBirthDate}
         value={birthDate}
       />
 
       <View style={styles.genderContainer}>
         <Text style={styles.label}>반려동물 성별</Text>
-        <SvgXml xml={svgString2} width="24" height="24" style={styles.icon1}/>
+        <SvgXml xml={svgString2} width="24" height="24" style={styles.genderButton}/>
         <TouchableOpacity
           style={[styles.genderButton, gender === '남아' && styles.selectedButton]}
           onPress={() => setGender('남아')}
         >
           <Text style={styles.genderButtonText}>남아</Text>
         </TouchableOpacity>
-        <SvgXml xml={svgString3} width="24" height="24" style={styles.icon1}/>
+        <SvgXml xml={svgString3} width="24" height="24" style={styles.genderButton}/>
         <TouchableOpacity
           style={[styles.genderButton, gender === '여아' && styles.selectedButton]}
           onPress={() => setGender('여아')}
@@ -197,48 +221,20 @@ const styles = StyleSheet.create({
     height: '100%',
     backgroundColor: 'rgba(255, 255, 255, 1)',
     padding: 20,
-    top: 120,
   },
-  back: {
-        right: 10,
-        top: -100,
+  backButton: {
+    position: 'absolute',
+    top: 30,
+    left: 10,
+    backgroundColor: 'rgba(255,255, 255, 255)',
+    padding: 10,
+    borderRadius: 5,
   },
-  profileContainer: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  profile: {
-    width: 84,
-    height: 84,
-    borderRadius: '50',
-    borderWidth: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 40,
-  },
-  iconContainer: {
-    backgroundColor: '#ffffff',
-    top: 90,
-    left: 30,
-    zIndex: 1,
-    width: 32,  // 아이콘의 너비를 설정
-    height: 32, // 아이콘의 높이를 설정
-    borderRadius: 16, // 둥글게 만들기 (높이와 너비의 절반)
-  },
-  icon2: {
-    width: '100%',
-    height: '100%',
-  },
-  imagePreview: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    marginTop: 10,
-  },
-  icon3: {
-    top: 97,
-    zIndex: 1,
+  backButtonText: {
+    color: 'rgba(0, 0, 0, 1)',
+    fontFamily: 'Roboto',
+    fontSize: 16,
+    fontWeight: '600',
   },
   petTypeContainer: {
     width: 324,
@@ -261,8 +257,41 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginLeft: 'auto',
   },
+  profileContainer: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    top: -150,
+  },
+  profile: {
+    width: 84,
+    height: 84,
+    borderRadius: 50,
+    borderWidth: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: -120,
+  },
+  iconContainer: {
+    backgroundColor: '#ffffff',
+    top: 90,
+    left: 30,
+    zIndex: 1,
+    width: 32,  // 아이콘의 너비를 설정
+    height: 32, // 아이콘의 높이를 설정
+    borderRadius: 16, // 둥글게 만들기 (높이와 너비의 절반)
+  },
+  icon2: {
+    width: '100%',
+    height: '100%',
+  },
+  icon3: {
+    top: 97,
+    zIndex: 1,
+  },
+
   petTypeButton: {
-    width: 90,
+    width: 80,
        height: 30,
        flexShrink: 0,
        borderBottomLeftRadius: 100,
@@ -275,13 +304,8 @@ const styles = StyleSheet.create({
        backgroundColor: 'rgba(255, 255, 255, 1)',
        justifyContent: 'center',
        alignItems: 'center',
-       marginLeft: -20, // 첫 번째 버튼의 왼쪽 여백을 0으로 설정
+       marginLeft: 10, // 첫 번째 버튼의 왼쪽 여백을 0으로 설정
        right : 10,
-  },
-  icon: {
-    top: 1,
-    left: 5,
-    zIndex: 1, // 아이콘이 텍스트 필드 위에 있도록 설정
   },
   genderContainer: {
     width: 324,
@@ -301,7 +325,7 @@ const styles = StyleSheet.create({
         marginVertical: 10,
   },
   genderButton: {
-   width: 80,
+   width: 70,
        height: 30,
        flexShrink: 0,
        borderBottomLeftRadius: 100,
@@ -314,16 +338,11 @@ const styles = StyleSheet.create({
        backgroundColor: 'rgba(255, 255, 255, 1)',
        justifyContent: 'center',
        alignItems: 'center',
-       marginLeft: -13, // 첫 번째 버튼의 왼쪽 여백을 0으로 설정
-       left: 40,
-  },
-  icon1: {
-    top: 0,
-    left: 60,
-    zIndex: 1, // 아이콘이 텍스트 필드 위에 있도록 설정
+       marginLeft: 0, // 첫 번째 버튼의 왼쪽 여백을 0으로 설정
+       left: 30,
   },
   neuteringContainer: {
-    width: 324,
+width: 324,
     height: 46,
     borderRadius: 10,
     borderWidth: 1,
@@ -363,13 +382,11 @@ const styles = StyleSheet.create({
     color: 'rgba(0, 0, 0, 1)',
     fontFamily: 'Roboto',
     fontSize: 15,
-    left: 15,
   },
   genderButtonText: {
     color: 'rgba(0, 0, 0, 1)',
     fontFamily: 'Roboto',
     fontSize: 15,
-    left: 15,
   },
   neuteringButtonText: {
     color: 'rgba(0, 0, 0, 1)',
@@ -387,7 +404,7 @@ const styles = StyleSheet.create({
     shadowRadius: 20,
     shadowOffset: { width: 0, height: 4 },
     marginVertical: 10,
-    paddingHorizontal: 25,
+    paddingHorizontal: 10,
   },
   label: {
     width: 70,
@@ -409,7 +426,7 @@ const styles = StyleSheet.create({
     color: 'rgba(0, 0, 0, 1)',
     fontFamily: 'Roboto',
     fontSize: 20,
-    fontWeight: '900',
+    fontWeight: '500',
   },
   title: {
     color: 'rgba(0, 0, 0, 1)',
@@ -417,9 +434,10 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: '500',
     textAlign: 'center',
-    marginBottom: -135,
-    top: -90,
+    marginBottom: 150,
+    top: 50,
   },
 });
+
 
 export default Information1;

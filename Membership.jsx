@@ -5,7 +5,7 @@ import { createUserWithEmailAndPassword } from "firebase/auth"; // auth에서 �
 import { setDoc, doc } from "firebase/firestore"; // Firestore에서 setDoc과 doc을 임포트
 import { firestore } from "../Firebase"; // Firestore 설정을 임포트
 
-const Membership = ({ onBack }) => {
+const Membership = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -29,7 +29,7 @@ const Membership = ({ onBack }) => {
       Alert.alert("회원가입 성공!", "회원가입이 완료되었습니다.", [
         {
           text: "확인",
-          onPress: onBack, // 로그인 화면으로 돌아가기
+          onPress: () => navigation.navigate("Login"), // 로그인 화면으로 이동
         },
       ]);
     } catch (error) {
@@ -74,8 +74,7 @@ const Membership = ({ onBack }) => {
         <Text style={styles.signupText}>가입하기</Text>
       </TouchableOpacity>
 
-      {/* 뒤로가기 버튼 */}
-      <TouchableOpacity onPress={onBack}>
+      <TouchableOpacity onPress={() => navigation.navigate("Login")}>
         <Text style={styles.backText}>뒤로가기</Text>
       </TouchableOpacity>
     </View>
@@ -99,8 +98,8 @@ const styles = StyleSheet.create({
     borderColor: '#999999',
     borderWidth: 1,
     borderRadius: 10,
-    height: 66,
-    width: 360,
+    height: 56,
+    width: 330,
     marginVertical: 5,
     paddingHorizontal: 10,
     marginBottom: 20,
@@ -113,7 +112,7 @@ const styles = StyleSheet.create({
     textAlignVertical: 'center', // 글씨를 수직 중앙 정렬
   },
   signupButton: {
-    width: 364,
+    width: 330,
     height: 56,
     backgroundColor: '#ffe69e',
     borderRadius: 10,

@@ -1,38 +1,43 @@
-import { initializeApp, getApps, getApp } from "firebase/app";
+// firebase.js
+import { initializeApp, getApp, getApps } from "firebase/app";
 import { getAuth, initializeAuth, getReactNativePersistence } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
-import { getStorage } from "firebase/storage";  // Storage를 사용하기 위해 추가
-import ReactNativeAsyncStorage from "@react-native-async-storage/async-storage";
+import { getStorage } from "firebase/storage";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-// Firebase 설정 객체
 const firebaseConfig = {
-  apiKey: "AIzaSyD2VPWGSBDp_h0KKoJjVGbSYjNQYcVh21I",
-  authDomain: "pet-tracker-ba9d3.firebaseapp.com",
-  projectId: "pet-tracker-ba9d3",
-  storageBucket: "pet-tracker-ba9d3.appspot.com",
-  messagingSenderId: "600924952504",
-  appId: "1:600924952504:web:5c100b1192b7c27587e14d",
-  measurementId: "G-YVFV5TN8HB"
+  apiKey: "AIzaSyCSjbFqHrJU_PwTjym1qDvG8qAwfII35lw",
+  authDomain: "pet-tracker-65ea5.firebaseapp.com",
+  projectId: "pet-tracker-65ea5",
+  storageBucket: "pet-tracker-65ea5.appspot.com",
+  messagingSenderId: "1068349352534",
+  appId: "1:1068349352534:web:9756045a1e6c78512ba9f7",
+  measurementId: "G-EQ83X48Q0E"
 };
 
-// Firebase 앱이 초기화되었는지 확인
 let app;
-if (!getApps().length) {
+let auth;
+let firestore;
+let storage;
+
+// Firebase 앱이 이미 초기화되었는지 확인
+if (getApps().length === 0) {
   app = initializeApp(firebaseConfig);
+
+  // Firebase Auth 초기화 (AsyncStorage 설정 포함)
+  auth = initializeAuth(app, {
+    persistence: getReactNativePersistence(AsyncStorage)
+  });
 } else {
-  app = getApp(); // 이미 초기화된 앱이 있을 경우 해당 앱을 사용
+  app = getApp(); // 이미 초기화된 앱 가져오기
+  auth = getAuth(app); // 기존 초기화된 Auth 가져오기
 }
 
-// Firebase Auth 초기화
-const auth = initializeAuth(app, {
-  persistence: getReactNativePersistence(ReactNativeAsyncStorage),
-});
-
 // Firestore 초기화
-const db = getFirestore(app); // Firestore 데이터베이스 인스턴스 생성
+firestore = getFirestore(app);
 
 // Storage 초기화
-const storage = getStorage(app);  // Storage 인스턴스 생성
+storage = getStorage(app);
 
-// app, auth, db를 내보내기
-export { app, auth, db, storage };
+// app, auth, firestore, storage를 내보내기
+export { app, auth, firestore, storage };

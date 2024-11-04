@@ -12,7 +12,7 @@ const svgString = `
 <path d="M21.9713 7.39071L21.9708 7.39268C21.8889 7.37313 21.8061 7.35799 21.7226 7.34716C20.2305 7.1516 18.8456 8.35868 18.5547 10.5908C18.2785 12.7267 19.1606 14.6193 20.5452 14.9476C20.608 14.9626 20.6714 14.9742 20.7354 14.9824C22.2309 15.1766 23.6729 13.5207 23.9611 11.291C24.2335 9.18405 23.3286 7.71255 21.9713 7.39071ZM21.978 11.0336C21.8717 11.7815 21.5897 12.5089 20.9939 12.9862C20.5384 12.3733 20.4239 11.6383 20.5381 10.8473C20.6543 10.3573 20.7643 9.87274 21.0852 9.48893C21.2602 9.29004 21.4087 9.32102 21.4665 9.32857L21.5097 9.33809C21.8376 9.4158 22.1026 10.0703 21.978 11.0336Z" fill="black"/>
 </svg>`;
 
-export function Main({ onNavigate, onLogout }) {
+export function Main({ navigation }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [modalAnimation] = useState(new Animated.Value(-300));
 
@@ -44,7 +44,7 @@ export function Main({ onNavigate, onLogout }) {
           text: '확인',
           onPress: () => {
             auth.signOut()
-              .then(onLogout)
+              .then(() => navigation.navigate('Login')) // 로그아웃 후 로그인 화면으로 이동
               .catch((error) => console.error('로그아웃 오류:', error));
           },
         },
@@ -55,8 +55,12 @@ export function Main({ onNavigate, onLogout }) {
 
   const handleNavigate = () => {
     toggleModal();
-    const userId = auth.currentUser.uid; // 유저 ID 가져오기
-    onNavigate('Information3', { userId }); // userId를 함께 전달
+    const userId = auth.currentUser?.uid; // 유저 ID 가져오기
+    if (userId) {
+      navigation.navigate('Information3', { userId }); // userId를 함께 전달
+    } else {
+      Alert.alert('사용자 정보를 찾을 수 없습니다.'); // 유저 ID가 없을 경우 경고
+    }
   };
 
   return (
@@ -86,7 +90,6 @@ export function Main({ onNavigate, onLogout }) {
                     </View>
                   </View>
                   <Text style={styles.nameText}>이름</Text>
-                  <SvgXml xml={svgString} width="48" height="48" style={styles.icon}/>
                   <View style={styles.bottomContainer}>
                     <View style={styles.separator1} />
                     <View style={styles.logoutContainer}>
@@ -180,7 +183,7 @@ const styles = StyleSheet.create({
     width:  210, // 상단 선의 길이
     backgroundColor: 'rgba(0, 0, 0, 0.2)', // 상단 선의 색상 (희미하게)
     marginBottom: 20, // 상단 선과 내용 간의 간격
-    top: 120,
+    top: 130,
   },
   headerContainer: {
     flexDirection: 'row',

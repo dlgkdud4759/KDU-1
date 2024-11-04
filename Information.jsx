@@ -1,20 +1,16 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
-export default function InformationScreen({ onNavigate, onGoBack }) {
+const Information = ({ navigation }) => {
   const handleBoxClick = (screen) => {
-    onNavigate(screen);
+    navigation.navigate(screen); // React Navigation의 navigate 메서드를 사용
   };
 
   return (
     <View style={styles.root}>
-      <TouchableOpacity style={styles.backButton} onPress={onGoBack}>
-        <Text style={styles.back}>뒤로가기</Text>
-      </TouchableOpacity>
-
       <TouchableOpacity
         style={styles.rectangle}
-        onPress={() => handleBoxClick('information1')}
+        onPress={() => handleBoxClick('Information1')}
         accessibilityLabel="반려동물 정보 입력"
       >
         <Text style={styles.largeText}>반려동물을 키우고 있어요</Text>
@@ -23,7 +19,7 @@ export default function InformationScreen({ onNavigate, onGoBack }) {
 
       <TouchableOpacity
         style={styles.rectangle}
-        onPress={() => handleBoxClick('information2')}
+        onPress={() => handleBoxClick('Information2')}
         accessibilityLabel="입양 정보 입력"
       >
         <Text style={styles.largeText}>입양 예정이예요</Text>
@@ -32,7 +28,7 @@ export default function InformationScreen({ onNavigate, onGoBack }) {
 
       <TouchableOpacity
         style={styles.rectangle}
-        onPress={() => handleBoxClick('main')}
+        onPress={() => handleBoxClick('Main')}
         accessibilityLabel="앱 둘러보기"
       >
         <Text style={styles.largeText}>앱 둘러보기</Text>
@@ -48,7 +44,7 @@ export default function InformationScreen({ onNavigate, onGoBack }) {
       </TouchableOpacity>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   root: {
@@ -107,3 +103,5 @@ const styles = StyleSheet.create({
     color: '#000',
   },
 });
+
+export default Information;
