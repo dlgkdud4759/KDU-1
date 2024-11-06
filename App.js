@@ -1,30 +1,97 @@
-import React from "react";
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import React, { useState } from "react";
+import { View, StyleSheet } from "react-native";
 import Login from './src/components/Login';  
 import Information from "./src/components/Information";
 import Membership from './src/components/Membership';  
 import Information1 from './src/components/Information1'; 
 import Information2 from './src/components/Information2';  
-import Information3 from './src/components/Information3'; 
-import Main from './src/components/Main';  
-import ProfileImageUploader from "./src/components/ProfileImageUploader";
-
-const Stack = createNativeStackNavigator();
+import Main from './src/components/Main';
+import Store from './src/components/Store';
 
 export default function App() {
+  const [currentScreen, setCurrentScreen] = useState("login");
+
+  const handleLoginNavigation = () => {
+    setCurrentScreen("information");
+  };
+
+  const handleSignupNavigation = () => {
+    setCurrentScreen("membership");
+  };
+
+  const handleBackToLogin = () => {
+    setCurrentScreen("login");
+  };
+
+  const handleBackToInformation = () => {
+    setCurrentScreen("information");
+  };
+
+  const handleNavigate = (screen) => {
+    setCurrentScreen(screen);
+  };
+
+  const handleInformation1Navigation = () => {
+    setCurrentScreen("information1");
+  };
+
+  const handleInformation2Navigation = () => {
+    setCurrentScreen("information2");
+  };
+
+  const handleMainNavigation = () => {
+    setCurrentScreen("main");
+  };
+
+  const handleStoreNavigation = () => {
+    setCurrentScreen("store");
+  };
+
   return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="Login">
-        <Stack.Screen name="Login" component={Login} options={{ headerShown: false }} />
-        <Stack.Screen name="Information" component={Information} options={{ headerShown: false }} />
-        <Stack.Screen name="Membership" component={Membership} options={{ headerShown: false }} />
-        <Stack.Screen name="Information1" component={Information1} options={{ headerShown: false }} />
-        <Stack.Screen name="Information2" component={Information2} options={{ headerShown: false }} />
-        <Stack.Screen name="Information3" component={Information3} options={{ headerShown: false }} />
-        <Stack.Screen name="Main" component={Main} options={{ headerShown: false }} />
-        <Stack.Screen name="ProfileImageUploader" component={ProfileImageUploader} options={{ headerShown: false }} />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <View style={styles.container}>
+      {currentScreen === "login" && (
+        <Login
+          onNavigate={handleLoginNavigation}
+          onNavigateToMembership={handleSignupNavigation}
+        />
+      )}
+      {currentScreen === "information" && (
+        <Information
+          onNavigate={handleNavigate}
+          onNavigateToInformation1={handleInformation1Navigation}
+        />
+      )}
+      {currentScreen === "membership" && (
+        <Membership onBack={handleBackToLogin} />
+      )}
+      {currentScreen === "information1" && (
+        <Information1 
+          onBack={handleBackToInformation} 
+          onSuccess={handleMainNavigation} // 성공 시 Main으로 이동
+        />
+      )}
+      {currentScreen === "information2" && (
+        <Information2
+          onBack={handleBackToInformation}
+          onNavigate={handleMainNavigation}
+        />
+      )}
+      {currentScreen === "main" && (
+        <Main onNavigate={handleStoreNavigation} />
+      )}
+      {currentScreen === "store" && (
+        <Store 
+          onBack={handleMainNavigation}
+        />
+      )}
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});
