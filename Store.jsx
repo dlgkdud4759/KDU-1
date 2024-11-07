@@ -216,6 +216,8 @@ const styles = StyleSheet.create({
     width: '50%',
     justifyContent: 'space-between',
     flexDirection: 'row',
+    paddingEnd: 3,
+    paddingStart: 3,
     padding: 12,
     borderRadius: 50,
     backgroundColor: '#F1F1F5',
@@ -224,16 +226,21 @@ const styles = StyleSheet.create({
   filterText: {
     fontSize: 16,
     fontWeight: '500',
+    paddingEnd: 12,
+    paddingStart: 12,
     color: '#A9A9A9', // 비활성화 텍스트 색상
   },
   activeFilter: {
     backgroundColor: '#FFFFFF', // 활성화된 버튼 배경색
     paddingHorizontal: 20,
+    height: '200%',
+    top: -10,
     borderRadius: 50,
   },
   activeFilterText: {
     fontSize: 16,
     fontWeight: '900',
+    top: 10,
     color: '#111111', // 활성화된 텍스트 색상
   },
   title: {
