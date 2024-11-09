@@ -79,9 +79,7 @@ const svgString8 = `
 <path d="M54.3947 13.8237C54.2959 14.2655 54.0591 14.6659 53.7141 14.9745C53.3691 15.283 52.9315 15.4858 52.4566 15.5571C51.9817 15.6285 51.4908 15.5652 51.046 15.3753C50.6012 15.1853 50.2224 14.8773 49.9577 14.4902C49.6929 14.103 49.554 13.6541 49.5586 13.2002C49.5631 12.7463 49.7109 12.3078 49.9832 11.9402C50.2555 11.5725 50.6401 11.2922 51.0884 11.1347C51.5366 10.9772 52.0284 10.9496 52.5016 11.0554C53.1361 11.1972 53.692 11.5686 54.047 12.0877C54.402 12.6069 54.5271 13.2313 54.3947 13.8237ZM40.0407 10.6152C40.1394 10.1734 40.0957 9.71025 39.9149 9.28419C39.7341 8.85812 39.4245 8.48832 39.0251 8.22156C38.6258 7.95479 38.1546 7.80304 37.6713 7.78549C37.188 7.76794 36.7142 7.88539 36.3098 8.12297C35.9054 8.36055 35.5886 8.7076 35.3994 9.12023C35.2102 9.53287 35.1572 9.99255 35.2471 10.4412C35.3369 10.8898 35.5656 11.3071 35.9041 11.6405C36.2427 11.9739 36.6759 12.2082 37.1491 12.314C37.7836 12.4558 38.4447 12.3565 38.987 12.0379C39.5292 11.7194 39.9083 11.2076 40.0407 10.6152ZM42.1061 9.40177C42.5793 9.50753 43.0711 9.47993 43.5194 9.32244C43.9676 9.16495 44.3522 8.88466 44.6245 8.51701C44.8968 8.14935 45.0446 7.71085 45.0491 7.25695C45.0537 6.80305 44.9148 6.35414 44.65 5.96698C44.3853 5.57983 44.0066 5.27182 43.5618 5.08191C43.117 4.89199 42.6261 4.82871 42.1511 4.90004C41.6762 4.97138 41.2386 5.17415 40.8936 5.4827C40.5486 5.79124 40.3118 6.19171 40.213 6.63347C40.0806 7.22584 40.2057 7.8503 40.5607 8.36945C40.9157 8.88861 41.4716 9.25995 42.1061 9.40177ZM48.2578 10.7768C48.731 10.8826 49.2228 10.855 49.6711 10.6975C50.1193 10.54 50.5039 10.2597 50.7762 9.89207C51.0485 9.52442 51.1963 9.08592 51.2008 8.63202C51.2054 8.17812 51.0665 7.72921 50.8017 7.34205C50.537 6.9549 50.1583 6.64689 49.7135 6.45698C49.2687 6.26706 48.7778 6.20377 48.3028 6.27511C47.8279 6.34645 47.3903 6.54922 47.0453 6.85776C46.7003 7.16631 46.4635 7.56678 46.3647 8.00854C46.2323 8.60091 46.3574 9.22537 46.7124 9.74452C47.0674 10.2637 47.6233 10.635 48.2578 10.7768ZM49.148 16.0732C48.8408 15.8167 48.5887 15.5074 48.406 15.1627C48.2234 14.8181 48.1138 14.4449 48.0836 14.0647C48.0194 13.2842 47.688 12.5369 47.139 11.9352C46.59 11.3335 45.8532 10.9099 45.0392 10.7279C44.2253 10.546 43.3782 10.6156 42.6253 10.9263C41.8723 11.237 41.2543 11.772 40.8639 12.4509C40.4843 13.1176 39.8344 13.6079 39.0565 13.8141C38.3125 14.0024 37.6638 14.4204 37.213 15.002C36.7622 15.5835 36.535 16.2954 36.5675 17.0251C36.5999 17.7548 36.8901 18.4607 37.3921 19.031C37.8942 19.6013 38.5794 20.0035 39.3394 20.1741C39.7946 20.2771 40.2647 20.293 40.7212 20.2208C42.1735 20.0048 43.6746 20.3403 44.8967 21.1541C45.6331 21.664 46.5428 21.8919 47.4349 21.7899C48.327 21.6879 49.1324 21.264 49.6821 20.6071C50.2319 19.9502 50.4833 19.1112 50.3837 18.2661C50.2841 17.421 49.8414 16.6346 49.148 16.0732Z" fill="#FF7096"/>
 </svg>`;
 
-
-
-export function Main({ onNavigate, onLogout }) {
+export function Main({ navigation }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [modalAnimation] = useState(new Animated.Value(-300));
 
@@ -113,7 +111,7 @@ export function Main({ onNavigate, onLogout }) {
           text: '확인',
           onPress: () => {
             auth.signOut()
-              .then(onLogout)
+              .then(() => navigation.navigate('Login')) // 로그아웃 후 로그인 화면으로 이동
               .catch((error) => console.error('로그아웃 오류:', error));
           },
         },
@@ -124,10 +122,13 @@ export function Main({ onNavigate, onLogout }) {
 
   const handleNavigate = () => {
     toggleModal();
-    const userId = auth.currentUser.uid; // 유저 ID 가져오기
-    onNavigate('Information3', { userId }); // userId를 함께 전달
+    const userId = auth.currentUser?.uid; // 유저 ID 가져오기
+    if (userId) {
+      navigation.navigate('Information3', { userId }); // userId를 함께 전달
+    } else {
+      Alert.alert('사용자 정보를 찾을 수 없습니다.'); // 유저 ID가 없을 경우 경고
+    }
   };
-
   const IconText = ({ text, iconXml, style }) => (
     <View style={styles.iconTextContainer}>
       {iconXml && <SvgXml xml={iconXml} width="60" height="60" style={styles.icon1} />}
@@ -135,17 +136,11 @@ export function Main({ onNavigate, onLogout }) {
     </View>
   );
 
-  const handleClick = (screen) => {
-    onNavigate(screen); // 여기에 screen 매개변수를 사용하여 화면 전환
-  };
-
   return (
     <View style={styles.root}>
-      <View style={styles.header}>
-          <TouchableOpacity style={styles.openButton} onPress={toggleModal}>
-            <SvgXml xml={svgString3} width="36" height="36" style={styles.icon2}/>
-          </TouchableOpacity>
-      </View>
+      <TouchableOpacity style={styles.openButton} onPress={toggleModal}>
+      <SvgXml xml={svgString3} width="36" height="36" style={styles.icon2}/>
+      </TouchableOpacity>
       <Modal
         visible={modalVisible}
         transparent={true}
@@ -183,43 +178,42 @@ export function Main({ onNavigate, onLogout }) {
           </View>
         </TouchableWithoutFeedback>
       </Modal>
-      <View style={styles.title}>
-  <Text style={styles.petTracker}>Pet Tracker</Text>
-  <Text style={styles.text}>강아지, 고양이 이미지</Text>
-</View>
-
-<View style={styles.content}>
-  <View style={styles.row}>
-    <TouchableOpacity>
-    <IconText text="입양" iconXml={svgString4} style={styles.subText} />
-    </TouchableOpacity>
-    <TouchableOpacity onPress={(handleStoreNavigation) => onNavigate('Store')}>
-    <IconText text="펫 마켓" iconXml={svgString5} style={styles.subText} />
-    </TouchableOpacity>
-    <TouchableOpacity>
-    <IconText text="행사일정" iconXml={svgString6} style={styles.subText} />
-    </TouchableOpacity>
-  </View>
-
-  <View style={[styles.row1, styles.rowMargin]}>
-    <TouchableOpacity>
-    <IconText text="증상검사" iconXml={svgString7} style={styles.featureText} />
-    </TouchableOpacity>
-    <TouchableOpacity>
-    <IconText text="산책" iconXml={svgString8} style={styles.featureText} />
-    </TouchableOpacity>
-  </View>
-
-  <Text style={styles.eventText}>행사 정보</Text>
-</View>
+      <View style={styles.header}>
+        <Text style={styles.petTracker}>Pet Tracker</Text>
+        <Text style={styles.text}>강아지, 고양이 이미지</Text>
+      </View>
+      <View style={styles.content}>
+        <View style={styles.row}>    
+          <TouchableOpacity>
+            <IconText text="입양" iconXml={svgString4} style={styles.subText} />
+         </TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate("Store")}>
+            <IconText text="펫 마켓" iconXml={svgString5} style={styles.subText} />
+          </TouchableOpacity>
+          <TouchableOpacity>
+            <IconText text="행사일정" iconXml={svgString6} style={styles.subText} />
+          </TouchableOpacity>
+        </View>
+        <View style={[styles.row, styles.rowMargin]}>
+        <TouchableOpacity>
+          <IconText text="증상검사" iconXml={svgString7} style={styles.featureText} />
+        </TouchableOpacity>
+        <TouchableOpacity>
+         <IconText text="산책" iconXml={svgString8} style={styles.featureText} />
+        </TouchableOpacity>
+        </View>
+        <Text style={styles.eventText}>행사 정보</Text>
+      </View>
       <View style={styles.footer}>
         <View style={styles.navItem}>
           <SvgXml xml={svgString} width="36" height="36" style={styles.icon}/>
           <Text style={styles.navText}>홈</Text>
         </View>
         <View style={styles.navItem}>
+        <TouchableOpacity onPress={() => navigation.navigate("MapComponent")}>
           <SvgXml xml={svgString1} width="36" height="36" style={styles.icon}/>
           <Text style={styles.navText}>지도</Text>
+          </TouchableOpacity>
         </View>
         <View style={styles.navItem}>
           <SvgXml xml={svgString2} width="36" height="36" style={styles.icon}/>
@@ -237,20 +231,35 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  header: {
-    flexDirection: 'row',
-    textAlign: 'center',
-    paddingHorizontal: 10,
-    marginTop: 30,
-  },
   icon2: {
     position: 'absolute',
     marginTop: 15,
   },
-  petTracker: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: 'rgba(0, 0, 0, 1)',
+  icon: {
+    alignItems: 'center',
+    marginBottom: 8,
+    left: 20,
+  },
+  featureText: {
+    fontSize: 20,
+    color: 'rgba(0, 0, 0, 0.7)',
+    paddingTop: 10,
+  },
+  subText: {
+    fontSize: 20,
+    color: 'rgba(0, 0, 0, 0.7)',
+    paddingTop: 10,
+  },
+  openButton: {
+    position: 'absolute',
+    top: 20,
+    left: 10,
+    padding: 10,
+    backgroundColor: '#ffffff',
+    borderRadius: 10,
+  },
+  openButtonText: {
+    color: 'black',
   },
   modalContainer: {
     flex: 1,
@@ -281,7 +290,7 @@ const styles = StyleSheet.create({
     width:  210, // 상단 선의 길이
     backgroundColor: 'rgba(0, 0, 0, 0.2)', // 상단 선의 색상 (희미하게)
     marginBottom: 20, // 상단 선과 내용 간의 간격
-    top: 120,
+    top: 130,
   },
   headerContainer: {
     flexDirection: 'row',
@@ -313,6 +322,9 @@ const styles = StyleSheet.create({
     position: 'absolute', // 좌측 상단 끝에 붙이기 위해 position 절대값으로 설정
     top: 100, // 상단에서 떨어진 거리
     left: 48,
+  },
+  icon: {
+    top: -5,
   },
   logoutText: {
     fontSize: 16,
@@ -350,51 +362,62 @@ const styles = StyleSheet.create({
     color: 'blue',
     marginTop: 20,
   },
-  title: {
+  header: {
     alignItems: 'center',
-    marginTop: 30,
-    borderBottomWidth: 1, 
-    borderBottomColor: 'rgba(0, 0, 0, 0.1)',
+    marginTop: 70,
+  },
+  petTracker: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: 'rgba(0, 0, 0, 1)',
+    top: -30,
   },
   text: {
     fontSize: 30,
     top: 50,
   },
+  subText1: {
+    fontSize: 20,
+    color: 'rgba(0, 0, 0, 0.7)',
+    marginVertical: 10,
+    top: -30,
+    left: -20,
+  },
+  subText2: {
+    fontSize: 20,
+    color: 'rgba(0, 0, 0, 0.7)',
+    marginVertical: 10,
+    top: -30,
+  },
+  subText3: {
+    fontSize: 20,
+    color: 'rgba(0, 0, 0, 0.7)',
+    marginVertical: 10,
+    top: -30,
+  },
   content: {
-    flexDirection: 'column',
     alignItems: 'center',
     marginVertical: 50,
   },
   row: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    width: '100%',
-    paddingHorizontal: 50,
-  },
-  row1: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    width: '100%',
-    paddingHorizontal: 90,
+    justifyContent: 'space-around',
+    width: '95%',
   },
   rowMargin: {
-    marginTop: 15,
+    marginTop: 20,
+    marginRight: 50,
   },
-  subText: {
-    fontSize: 20,
+  featureText1: {
+    fontSize: 18,
     color: 'rgba(0, 0, 0, 0.7)',
-    paddingTop: 10,
+    marginVertical: 10,
+    left: -20,
   },
-  featureText: {
-    fontSize: 20,
+  featureText2: {
+    fontSize: 18,
     color: 'rgba(0, 0, 0, 0.7)',
-    paddingTop: 10,
-  },
-  iconTextContainer: {
-    alignItems: 'center',
-    marginBottom: 10,
+    marginVertical: 10,
   },
   eventText: {
     fontSize: 16,
@@ -415,14 +438,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 10,
   },
-  icon: {
-    alignItems: 'center',
-    marginBottom: 8,
-  },
   navText: {
     fontSize: 18,
     color: 'rgba(0, 0, 0, 0.7)',
-    marginBottom: 15,
   },
 });
 

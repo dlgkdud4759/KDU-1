@@ -1,7 +1,7 @@
 // firebase.js
 import { initializeApp, getApp, getApps } from "firebase/app";
 import { getAuth, initializeAuth, getReactNativePersistence } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore } from "firebase/firestore"; // firestore 모듈 가져오기
 import { getStorage } from "firebase/storage";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -40,4 +40,4 @@ firestore = getFirestore(app);
 storage = getStorage(app);
 
 // app, auth, firestore, storage를 내보내기
-export { app, auth, firestore, storage };
+export { app, auth, firestore, storage }; // firestore도 내보내기

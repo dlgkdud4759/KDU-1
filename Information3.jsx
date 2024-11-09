@@ -62,7 +62,7 @@ const Information3 = ({ navigation, route }) => {
             userId, 
             petType, 
             name, 
-            weight: parseFloat(weight), // 몸무게를 숫자로 변환
+            weight, // 몸무게를 숫자로 변환
             birthDate, 
             gender, 
             isNeutered 

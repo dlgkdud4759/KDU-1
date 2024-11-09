@@ -87,7 +87,7 @@ const Login = ({ navigation }) => {
         <Text style={styles.signupText}>회원가입</Text>
       </TouchableOpacity>
 
-      <Text style={styles.forgotPasswordText}>비밀번호를 잊으셨나요?</Text>
+    
     </View>
   );
 };

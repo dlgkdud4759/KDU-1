@@ -17,10 +17,11 @@ const svgString2 = `
 <path d="M21 7.00001H18.6667C18.6667 4.42168 16.5783 2.33334 14 2.33334C11.4217 2.33334 9.33332 4.42168 9.33332 7.00001H6.99999C5.71666 7.00001 4.66666 8.05001 4.66666 9.33334V23.3333C4.66666 24.6167 5.71666 25.6667 6.99999 25.6667H21C22.2833 25.6667 23.3333 24.6167 23.3333 23.3333V9.33334C23.3333 8.05001 22.2833 7.00001 21 7.00001ZM14 4.66668C15.2833 4.66668 16.3333 5.71668 16.3333 7.00001H11.6667C11.6667 5.71668 12.7167 4.66668 14 4.66668ZM21 23.3333H6.99999V9.33334H9.33332V11.6667C9.33332 12.3083 9.85832 12.8333 10.5 12.8333C11.1417 12.8333 11.6667 12.3083 11.6667 11.6667V9.33334H16.3333V11.6667C16.3333 12.3083 16.8583 12.8333 17.5 12.8333C18.1417 12.8333 18.6667 12.3083 18.6667 11.6667V9.33334H21V23.3333Z" fill="black"/>
 </svg>`;
 
-const Store = ({ onBack }) => {
+const Store = ({ navigation }) => {
   const [selectedFilter, setSelectedFilter] = useState('앱 내 용품');
   const [numColumns, setNumColumns] = useState(2);
-  const [products, setProducts] = useState([{
+  const [products, setProducts] = useState([
+    {
     id: 1,
     image: 'https://example.com/image1.jpg',
     name: 'Sample Product 1',
@@ -81,14 +82,20 @@ const Store = ({ onBack }) => {
   const handleFilterSelect = (filter) => setSelectedFilter(filter);
 
   const renderItem = ({ item }) => (
-    <View style={{marginRight: 10, marginBottom: 20}}>
-      <Image source={{ uri: item.image }} style={styles.image} />
-      <View style={styles.itemText}>
-        <Text style={styles.itemName}>{item.name}</Text>
-        <Text style={styles.itemDescription} numberOfLines={2}>{formatDescription(item.description)}</Text>
-        <Text style={styles.itemPrice}>{item.price}</Text>
-      </View>
-    </View>
+    <TouchableOpacity
+  style={[{ marginRight: 10, marginBottom: 20 }]}
+  onPress={() => {
+    console.log("Product pressed");
+    navigation.navigate('Product', { productId: item.id });
+  }}
+>
+  <Image source={{ uri: item.image }} style={styles.image} />
+  <View style={styles.itemText}>
+    <Text style={styles.itemName}>{item.name}</Text>
+    <Text style={styles.itemDescription} numberOfLines={2}>{formatDescription(item.description)}</Text>
+    <Text style={styles.itemPrice}>{item.price}</Text>
+  </View>
+</TouchableOpacity>
   );
 
   const formatDescription = (description) => {
@@ -102,19 +109,14 @@ const Store = ({ onBack }) => {
     return formattedText.trim();  // 마지막 줄바꿈을 제거
   };
 
-  const handleGoBack = () => {
-    if (onBack) {
-      onBack(); // onBack prop이 있으면 호출
-    }
-  };
 
   return (
     <View style={styles.root}>
       <View style={styles.headerContainer}>
         <View style={styles.header1}>
-          <TouchableOpacity onPress={handleGoBack}>
-            <SvgXml xml={svgString} width="24" height="24" style={styles.icon}/>
-          </TouchableOpacity>
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+        <SvgXml xml={svgString} width="24" height="24" style={styles.icon}/>
+      </TouchableOpacity>
         </View>
         <View style={styles.header2}>
           <TouchableOpacity>
@@ -153,7 +155,16 @@ const Store = ({ onBack }) => {
       </View>
 
       <View style={styles.title}>
-        <Text style={styles.titleText}>상품 <Text style={styles.productCount}>{products.length}</Text></Text>
+      <TouchableOpacity 
+    onPress={() => {
+      console.log("상품 텍스트 눌림");
+      navigation.navigate('Checkout'); // Checkout 화면으로 이동
+    }}
+  >
+    <Text style={styles.titleText}>
+      상품 <Text style={styles.productCount}>{products.length}</Text>
+    </Text>
+  </TouchableOpacity>
         <Text style={styles.titleText}>최신 순</Text>
       </View>
 
@@ -161,8 +172,6 @@ const Store = ({ onBack }) => {
         <View style={styles.menuBar}>
           <View style={styles.menuItem}><Text style={styles.menu}>전체</Text></View>
           <View style={styles.menuItem}><Text style={styles.menu}>사료</Text></View>
-          <View style={styles.menuItem}><Text style={styles.menu}>사료</Text></View>
-          <View style={styles.menuItem}><Text style={styles.menu}>간식</Text></View>
           <View style={styles.menuItem}><Text style={styles.menu}>간식</Text></View>
           <View style={styles.menuItem}><Text style={styles.menu}>배변 패드</Text></View>
           <View style={styles.menuItem}><Text style={styles.menu}>장난감</Text></View>
@@ -187,122 +196,124 @@ const Store = ({ onBack }) => {
 
 const styles = StyleSheet.create({
   root: {
-    flex: 1,
-    justifyContent: 'flex-start',
-    alignItems: 'center',
-  },
-  headerContainer: {
-    position: 'absolute',
-    top: 55,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
     width: '100%',
-  },
-  header1: {
-    alignItems: 'flex-start',
-    paddingLeft: 5,
-  },
-  header2: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  icon: {
-    marginHorizontal: 8,
-  },
-  filterContainer: {
-    position: 'absolute',
-    top: 110,
-    width: '50%',
-    justifyContent: 'space-between',
-    flexDirection: 'row',
-    paddingEnd: 3,
-    paddingStart: 3,
-    padding: 12,
-    borderRadius: 50,
-    backgroundColor: '#F1F1F5',
-    overflow: 'hidden',
-  },
-  filterText: {
-    fontSize: 16,
-    fontWeight: '500',
-    paddingEnd: 12,
-    paddingStart: 12,
-    color: '#A9A9A9', // 비활성화 텍스트 색상
-  },
-  activeFilter: {
-    backgroundColor: '#FFFFFF', // 활성화된 버튼 배경색
-    paddingHorizontal: 20,
-    height: '200%',
-    top: -10,
-    borderRadius: 50,
-  },
-  activeFilterText: {
-    fontSize: 16,
-    fontWeight: '900',
-    top: 10,
-    color: '#111111', // 활성화된 텍스트 색상
-  },
-  title: {
-    justifyContent: 'space-between',
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: '100%',
-    marginTop: 170,
-  },
-  titleText: {
-    paddingHorizontal: 10,
-    fontSize: 14,
-    fontWeight: '700',
-    marginBottom: 10,
-  },
-  productCount: {
-    color: '#0075FF',
-  },
-  scrollView: {
-    paddingRight: 20,
-    width: '100%',
-    marginTop: 100,
-  },
-  menuBar: {
-    flex: 1,
-    height: 40,
-    flexDirection: 'row',
-    paddingLeft: 10,
-    alignItems: 'center',
-    width: '100%',
-    marginBottom: 20,
-  },
-  menuItem: {
-    padding: 10,
-    borderRadius: 50,
-    backgroundColor: '#FFFFFF',
-    marginRight: 10,
-    borderWidth: 1,
-    borderColor: '#D3D3D3',
-  },
-  productList: {
-    width: '100%',
-  },
-  image: {
-    height: 180,
-    width: 180,
-    borderRadius: 8,
-    backgroundColor: '#999999',
-  },
-  itemText: {
-    marginLeft: 8,
-  },
-  itemName: {
-    marginTop: 5,
-  },
-  itemDescription: {
-    color: '#888888',
-  },
-  itemPrice: {
-    marginTop: 10,
-    fontWeight: '700',
-  },
+    height: '100%',
+    backgroundColor: 'rgba(255, 255, 255, 1)',
+    padding: 5,
+},
+headerContainer: {
+  position: 'absolute',
+  top: 55,
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  width: '100%',
+},
+header1: {
+  alignItems: 'flex-start',
+  paddingLeft: 5,
+},
+header2: {
+  flexDirection: 'row',
+  alignItems: 'center',
+},
+icon: {
+  marginHorizontal: 8,
+},
+filterContainer: {
+  position: 'absolute',
+  top: 110,
+  width: '50%',
+  justifyContent: 'space-between',
+  flexDirection: 'row',
+  paddingEnd: 3,
+  paddingStart: 3,
+  padding: 12,
+  borderRadius: 50,
+  backgroundColor: '#F1F1F5',
+  overflow: 'hidden',
+  right: 100,
+},
+filterText: {
+  fontSize: 14,
+  fontWeight: '500',
+  paddingEnd: 12,
+  paddingStart: 12,
+  color: '#A9A9A9', // 비활성화 텍스트 색상
+},
+activeFilter: {
+  backgroundColor: '#FFFFFF', // 활성화된 버튼 배경색
+  paddingHorizontal: 20,
+  height: '200%',
+  top: -9,
+  borderRadius: 50,
+},
+activeFilterText: {
+  fontSize: 14,
+  fontWeight: '900',
+  top: 10,
+  color: '#111111', // 활성화된 텍스트 색상
+},
+title: {
+  justifyContent: 'space-between',
+  flexDirection: 'row',
+  alignItems: 'center',
+  width: '100%',
+  marginTop: 170,
+},
+titleText: {
+  paddingHorizontal: 10,
+  fontSize: 14,
+  fontWeight: '700',
+  marginBottom: 10,
+},
+productCount: {
+  color: '#0075FF',
+},
+scrollView: {
+  paddingRight: 20,
+  width: '100%',
+  marginTop: 100,
+},
+menuBar: {
+  flex: 1,
+  height: 40,
+  flexDirection: 'row',
+  paddingLeft: 10,
+  alignItems: 'center',
+  width: '100%',
+  marginBottom: 20,
+},
+menuItem: {
+  padding: 10,
+  borderRadius: 50,
+  backgroundColor: '#FFFFFF',
+  marginRight: 10,
+  borderWidth: 1,
+  borderColor: '#D3D3D3',
+},
+productList: {
+  width: '100%',
+},
+image: {
+  height: 170,
+  width: 170,
+  borderRadius: 8,
+  backgroundColor: '#999999',
+},
+itemText: {
+  marginLeft: 8,
+},
+itemName: {
+  marginTop: 5,
+},
+itemDescription: {
+  color: '#888888',
+},
+itemPrice: {
+  marginTop: 10,
+  fontWeight: '700',
+},
 });
 
 export default Store;
