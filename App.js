@@ -1,4 +1,5 @@
 import React from "react";
+import 'react-native-get-random-values';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Login from './src/components/Login';  
@@ -10,9 +11,12 @@ import Information3 from './src/components/Information3';
 import Main from './src/components/Main';  
 import ProfileImageUploader from "./src/components/ProfileImageUploader";
 import Store from './src/components/Store';
-import Checkout from './src/components/Checkout'; // Checkout 컴포넌트 임포트
+import Checkout from './src/components/Checkout';
 import MapComponent from './src/components/MapComponent';
 import Product from './src/components/Product';
+import WalkPage from './src/components/WalkPage';
+import Walk from './src/components/walk';
+import WalkLog from './src/components/WalkLog';
 
 const Stack = createNativeStackNavigator();
 
@@ -32,6 +36,10 @@ export default function App() {
         <Stack.Screen name="Checkout" component={Checkout} options={{ headerShown: false }} /> 
         <Stack.Screen name="MapComponent" component={MapComponent} options={{ headerShown: false }} />
         <Stack.Screen name="Product" component={Product} options={{ headerShown: false }} />
+        
+        <Stack.Screen name="Walk" component={Walk} options={{ headerShown: false }} />
+        <Stack.Screen name="WalkLog" component={WalkLog} options={{ headerShown: false }} />
+        <Stack.Screen name="WalkPage" component={WalkPage} options={{ headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

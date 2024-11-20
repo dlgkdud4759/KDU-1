@@ -198,7 +198,7 @@ export function Main({ navigation }) {
         <TouchableOpacity>
           <IconText text="증상검사" iconXml={svgString7} style={styles.featureText} />
         </TouchableOpacity>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate("WalkPage")}>
          <IconText text="산책" iconXml={svgString8} style={styles.featureText} />
         </TouchableOpacity>
         </View>
@@ -231,35 +231,20 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+  header: {
+    flexDirection: 'row',
+    textAlign: 'center',
+    paddingHorizontal: 10,
+    marginTop: 30,
+  },
   icon2: {
     position: 'absolute',
     marginTop: 15,
   },
-  icon: {
-    alignItems: 'center',
-    marginBottom: 8,
-    left: 20,
-  },
-  featureText: {
-    fontSize: 20,
-    color: 'rgba(0, 0, 0, 0.7)',
-    paddingTop: 10,
-  },
-  subText: {
-    fontSize: 20,
-    color: 'rgba(0, 0, 0, 0.7)',
-    paddingTop: 10,
-  },
-  openButton: {
-    position: 'absolute',
-    top: 20,
-    left: 10,
-    padding: 10,
-    backgroundColor: '#ffffff',
-    borderRadius: 10,
-  },
-  openButtonText: {
-    color: 'black',
+  petTracker: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: 'rgba(0, 0, 0, 1)',
   },
   modalContainer: {
     flex: 1,
@@ -290,7 +275,7 @@ const styles = StyleSheet.create({
     width:  210, // 상단 선의 길이
     backgroundColor: 'rgba(0, 0, 0, 0.2)', // 상단 선의 색상 (희미하게)
     marginBottom: 20, // 상단 선과 내용 간의 간격
-    top: 130,
+    top: 120,
   },
   headerContainer: {
     flexDirection: 'row',
@@ -322,9 +307,6 @@ const styles = StyleSheet.create({
     position: 'absolute', // 좌측 상단 끝에 붙이기 위해 position 절대값으로 설정
     top: 100, // 상단에서 떨어진 거리
     left: 48,
-  },
-  icon: {
-    top: -5,
   },
   logoutText: {
     fontSize: 16,
@@ -362,62 +344,51 @@ const styles = StyleSheet.create({
     color: 'blue',
     marginTop: 20,
   },
-  header: {
+  title: {
     alignItems: 'center',
-    marginTop: 70,
-  },
-  petTracker: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: 'rgba(0, 0, 0, 1)',
-    top: -30,
+    marginTop: 30,
+    borderBottomWidth: 1, 
+    borderBottomColor: 'rgba(0, 0, 0, 0.1)',
   },
   text: {
     fontSize: 30,
     top: 50,
   },
-  subText1: {
-    fontSize: 20,
-    color: 'rgba(0, 0, 0, 0.7)',
-    marginVertical: 10,
-    top: -30,
-    left: -20,
-  },
-  subText2: {
-    fontSize: 20,
-    color: 'rgba(0, 0, 0, 0.7)',
-    marginVertical: 10,
-    top: -30,
-  },
-  subText3: {
-    fontSize: 20,
-    color: 'rgba(0, 0, 0, 0.7)',
-    marginVertical: 10,
-    top: -30,
-  },
   content: {
+    flexDirection: 'column',
     alignItems: 'center',
     marginVertical: 50,
   },
   row: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
-    width: '95%',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+    paddingHorizontal: 50,
+  },
+  row1: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+    paddingHorizontal: 90,
   },
   rowMargin: {
-    marginTop: 20,
-    marginRight: 50,
+    marginTop: 15,
   },
-  featureText1: {
-    fontSize: 18,
+  subText: {
+    fontSize: 20,
     color: 'rgba(0, 0, 0, 0.7)',
-    marginVertical: 10,
-    left: -20,
+    paddingTop: 10,
   },
-  featureText2: {
-    fontSize: 18,
+  featureText: {
+    fontSize: 20,
     color: 'rgba(0, 0, 0, 0.7)',
-    marginVertical: 10,
+    paddingTop: 10,
+  },
+  iconTextContainer: {
+    alignItems: 'center',
+    marginBottom: 10,
   },
   eventText: {
     fontSize: 16,
@@ -438,9 +409,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 10,
   },
+  icon: {
+    alignItems: 'center',
+    marginBottom: 8,
+  },
   navText: {
     fontSize: 18,
     color: 'rgba(0, 0, 0, 0.7)',
+    marginBottom: 15,
   },
 });
 
