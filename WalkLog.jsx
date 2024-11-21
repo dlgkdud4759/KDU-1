@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { firestore } from '../Firebase';
-import { collection, getDocs } from 'firebase/firestore';
+import { firestore, auth } from '../Firebase';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 
 const WalkLog = () => {
     const [walkLogs, setWalkLogs] = useState([]);
@@ -12,8 +12,24 @@ const WalkLog = () => {
 
     const fetchWalkLogs = async () => {
         try {
+            const currentUser = auth.currentUser;
+
+            if (!currentUser) {
+                console.log("No user is logged in.");
+                setWalkLogs([]);
+                setTotalCount(0);
+                setTotalDistance(0);
+                setTotalDuration("00:00");
+                return;
+            }
+
+            const userId = currentUser.uid;
+            console.log("Fetching logs for user:", userId);
+
+            // Firestore에서 해당 유저의 walks 컬렉션 필터링
             const logsRef = collection(firestore, "walks");
-            const snapshot = await getDocs(logsRef);
+            const userLogsQuery = query(logsRef, where("userId", "==", userId));
+            const snapshot = await getDocs(userLogsQuery);
 
             // 데이터가 없을 경우 초기화
             if (snapshot.empty) {

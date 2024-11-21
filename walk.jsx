@@ -7,6 +7,7 @@ import { Stop } from './SvgIcon';
 import { SvgXml } from 'react-native-svg';
 import { firestore } from '../Firebase';
 import { collection, addDoc, getDoc } from 'firebase/firestore';
+import { getAuth } from "firebase/auth";
 
 const Walk = () => {
     const [region, setRegion] = useState(null);
@@ -50,8 +51,17 @@ const Walk = () => {
 
     const saveWalkData = async (walkData) => {
         try {
+            const auth = getAuth(); // Firebase Authentication 가져오기
+            const userId = auth.currentUser?.uid; // 현재 로그인된 사용자 ID 가져오기
+    
+            if (!userId) {
+                Alert.alert('로그인이 필요합니다.', '로그인 후 다시 시도해주세요.');
+                return;
+            }
+
             const walksCollection = collection(firestore, 'walks');
-            const docRef = await addDoc(walksCollection, walkData);
+            const docRef = await addDoc(walksCollection, { ...walkData, userId });
+            console.log('Walk data saved successfully with ID:', docRef.id);
             
             // 문서 조회 (getDoc)
             const docSnapshot = await getDoc(docRef);
