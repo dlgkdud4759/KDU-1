@@ -1,6 +1,8 @@
-import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity, TextInput } from "react-native";
+import { useEffect, useState } from "react";
+import { ScrollView, View, Text, StyleSheet, TouchableOpacity, TextInput } from "react-native";
 import { SvgXml } from 'react-native-svg';
+import { collection, onSnapshot, query, where } from "firebase/firestore";
+import { firestore } from "../Firebase"; // firebase 설정 파일에서 firestore 가져오기
 
 const svgString = `
 <svg width="36" height="37" viewBox="0 0 36 37" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -28,47 +30,114 @@ const svgString3 = `
 <path d="M24.9998 23.5867L18.7378 17.3247C20.3644 15.3353 21.1642 12.7968 20.9716 10.2343C20.7791 7.67173 19.609 5.28123 17.7034 3.55722C15.7977 1.83321 13.3024 0.90759 10.7334 0.971822C8.16447 1.03605 5.71848 2.08522 3.9014 3.90231C2.08431 5.7194 1.03514 8.16539 0.970906 10.7343C0.906674 13.3033 1.83229 15.7987 3.5563 17.7043C5.28031 19.6099 7.67081 20.78 10.2333 20.9725C12.7959 21.1651 15.3344 20.3653 17.3238 18.7387L23.5858 25.0007L24.9998 23.5867ZM10.9998 19.0007C9.41753 19.0007 7.87081 18.5315 6.55522 17.6525C5.23963 16.7734 4.21425 15.524 3.60875 14.0622C3.00324 12.6004 2.84482 10.9918 3.1535 9.43997C3.46218 7.88813 4.22411 6.46266 5.34293 5.34384C6.46175 4.22502 7.88721 3.4631 9.43906 3.15441C10.9909 2.84573 12.5994 3.00416 14.0612 3.60966C15.5231 4.21516 16.7725 5.24054 17.6515 6.55614C18.5306 7.87173 18.9998 9.41845 18.9998 11.0007C18.9974 13.1217 18.1538 15.1551 16.654 16.6549C15.1542 18.1547 13.1208 18.9983 10.9998 19.0007Z" fill="black"/>
 </svg>`;
 
-const Community = ({navigation}) => {
+const Community = ({ navigation }) => {
+  const [posts, setPosts] = useState([]); // 게시물 데이터를 저장하는 상태
+  const [petType, setPetType] = useState(""); // 강아지/고양이 필터 상태
+  const [searchQuery, setSearchQuery] = useState(""); // 검색어 상태
+
+  // Firestore에서 데이터 가져오기
+  useEffect(() => {
+    const q = petType
+      ? query(collection(firestore, "posts"), where("category", "==", petType))
+      : collection(firestore, "posts");
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const fetchedPosts = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setPosts(fetchedPosts); // 상태에 게시물 데이터 저장
+    });
+
+    return () => unsubscribe(); // 컴포넌트가 언마운트될 때 리스너 정리
+  }, [petType]);
+
+  // 검색어에 맞는 게시물 필터링
+  const filteredPosts = posts.filter((post) =>
+    post.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    post.content.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-        <SvgXml xml={svgString6} width="24" height="24" style={styles.icon1}/>
-      </TouchableOpacity>
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+          <SvgXml xml={svgString6} width="24" height="24" style={styles.icon1} />
+        </TouchableOpacity>
         <Text style={styles.headerTitle}>게시판</Text>
       </View>
 
       <View style={styles.searchContainer}>
-      <SvgXml xml={svgString3} width="24" height="24" style={styles.searchIcon} />
+        <SvgXml xml={svgString3} width="24" height="24" style={styles.searchIcon} />
         <TextInput
           style={styles.searchInput}
           placeholder="검색어를 입력하세요"
           placeholderTextColor="#aaa"
+          value={searchQuery} // 검색어 상태 바인딩
+          onChangeText={setSearchQuery} // 검색어 변경 시 상태 업데이트
         />
       </View>
-      <View>
-      <TouchableOpacity style={styles.circle} onPress={() => navigation.navigate("Write")}>
-      </TouchableOpacity>
+
+      {/* 강아지/고양이 필터 */}
+      <View style={styles.petTypeSelection}>
+        <TouchableOpacity
+          style={[styles.petTypeButton, petType === "강아지" && styles.selectedButton]}
+          onPress={() => setPetType(petType === "강아지" ? "" : "강아지")} // 'dog'이 선택되어 있으면 해제, 아니면 'dog'으로 설정
+        >
+          <Text style={styles.petTypeButtonText}>강아지</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.petTypeButton, petType === "고양이" && styles.selectedButton]}
+          onPress={() => setPetType(petType === "고양이" ? "" : "고양이")} // 'cat'이 선택되어 있으면 해제, 아니면 'cat'으로 설정
+        >
+          <Text style={styles.petTypeButtonText}>고양이</Text>
+        </TouchableOpacity>
       </View>
-    <View style={styles.footer}>
-    <View style={styles.navItem}>
-      <SvgXml xml={svgString} width="36" height="36" style={styles.icon}/>
-      <Text style={styles.navText}>홈</Text>
+
+      {/* 게시물 목록을 ScrollView로 변경 */}
+      <ScrollView style={{ flex: 1, marginTop: 20 }}>
+        {filteredPosts.length > 0 ? (
+          filteredPosts.map((post) => (
+            <TouchableOpacity
+              key={post.id}
+              style={styles.postCard}
+              onPress={() => navigation.navigate("PostDetail", { postId: post.id })}
+            >
+              <Text style={styles.postTitle}>{post.title}</Text>
+              <Text style={styles.postContent} numberOfLines={3}>{post.content}</Text>
+              <Text style={styles.postCategory}>카테고리: {post.category}</Text>
+            </TouchableOpacity>
+          ))
+        ) : (
+          <Text style={styles.noResults}>검색 결과가 없습니다.</Text>
+        )}
+      </ScrollView>
+
+      {/* 작성 버튼 */}
+      <View>
+        <TouchableOpacity style={styles.circle} onPress={() => navigation.navigate("Write")} />
+      </View>
+
+      {/* 하단 네비게이션 */}
+      <View style={styles.footer}>
+        <View style={styles.navItem}>
+          <SvgXml xml={svgString} width="36" height="36" style={styles.icon} />
+          <Text style={styles.navText}>홈</Text>
+        </View>
+        <View style={styles.navItem}>
+          <TouchableOpacity onPress={() => navigation.navigate("MapComponent")}>
+            <SvgXml xml={svgString1} width="36" height="36" style={styles.icon} />
+            <Text style={styles.navText}>지도</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.navItem}>
+          <TouchableOpacity onPress={() => navigation.navigate("Community")}>
+            <SvgXml xml={svgString2} width="36" height="36" style={styles.icon} />
+            <Text style={styles.navText}>게시판</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
     </View>
-    <View style={styles.navItem}>
-    <TouchableOpacity onPress={() => navigation.navigate("MapComponent")}>
-      <SvgXml xml={svgString1} width="36" height="36" style={styles.icon}/>
-      <Text style={styles.navText}>지도</Text>
-      </TouchableOpacity>
-    </View>
-    <View style={styles.navItem}>
-    <TouchableOpacity onPress={() => navigation.navigate("Community")}>
-      <SvgXml xml={svgString2} width="36" height="36" style={styles.icon}/>
-      <Text style={styles.navText}>게시판</Text>
-      </TouchableOpacity>
-    </View>
-  </View>
-  </View>
   );
 };
 
@@ -153,12 +222,64 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   circle: {
-    width: 60, // 원의 크기 증가
-    height: 60, // 원의 크기 증가
+    width: 60, // 원의 크기
+    height: 60, // 원의 크기
     borderRadius: 50,
     backgroundColor: "#FFCA96", // 원 색상
-    top: 450,
-    left:280,
+    position: "absolute", // 절대 위치로 설정하여 화면 안에 위치
+    bottom: 100, // 화면 하단에 위치
+    right: 20, // 화면 오른쪽에 위치
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 5, // 안드로이드에서 그림자 추가
+  },
+  petTypeSelection: {
+    flexDirection: 'row',
+    justifyContent: 'center', // 버튼을 중앙 정렬
+    marginBottom: 20, // 검색창과의 간격을 위해 여백 추가
+    top: 30,
+  },
+  petTypeButtonText: {
+    color: 'rgba(0, 0, 0, 1)',
+    fontFamily: 'Roboto',
+    fontSize: 15,
+  },
+  selectedButton: {
+    backgroundColor: '#FFE69E', // 선택된 버튼 배경색
+  },
+  petTypeButton: {
+    backgroundColor: 'rgba(255, 255, 255, 1)',
+    borderWidth: 1,
+    borderColor: 'rgba(153, 153, 153, 1)',
+    borderRadius: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 90,
+    height: 40,
+    marginRight: 10,
+  },
+  postCard: {
+    backgroundColor: "#f9f9f9",
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10,
+    marginHorizontal: 20,
+  },
+  postTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 5,
+  },
+  postContent: {
+    fontSize: 16,
+    color: "#555",
+    marginBottom: 5,
+  },
+  postCategory: {
+    fontSize: 14,
+    color: "#999",
   },
 });
 

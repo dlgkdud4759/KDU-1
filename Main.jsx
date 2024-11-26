@@ -50,18 +50,6 @@ const svgString5 = `
 </g>
 </svg>`;
 
-const svgString6 = `
-<svg width="46" height="50" viewBox="0 0 46 50" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M10.5 15.75H35.5V39.5H10.5V15.75Z" fill="url(#paint0_linear_646_1026)"/>
-<path d="M41.75 4.5H36.125V2.625C36.125 2.12772 35.9275 1.65081 35.5758 1.29917C35.2242 0.947544 34.7473 0.75 34.25 0.75C33.7527 0.75 33.2758 0.947544 32.9242 1.29917C32.5725 1.65081 32.375 2.12772 32.375 2.625V4.5H13.625V2.625C13.625 2.12772 13.4275 1.65081 13.0758 1.29917C12.7242 0.947544 12.2473 0.75 11.75 0.75C11.2527 0.75 10.7758 0.947544 10.4242 1.29917C10.0725 1.65081 9.875 2.12772 9.875 2.625V4.5H4.25C3.25544 4.5 2.30161 4.89509 1.59835 5.59835C0.895088 6.30161 0.5 7.25544 0.5 8.25V45.75C0.5 46.7446 0.895088 47.6984 1.59835 48.4016C2.30161 49.1049 3.25544 49.5 4.25 49.5H41.75C42.7446 49.5 43.6984 49.1049 44.4016 48.4016C45.1049 47.6984 45.5 46.7446 45.5 45.75V8.25C45.5 7.25544 45.1049 6.30161 44.4016 5.59835C43.6984 4.89509 42.7446 4.5 41.75 4.5ZM9.875 12V10.125C9.875 9.62772 10.0725 9.15081 10.4242 8.79918C10.7758 8.44754 11.2527 8.25 11.75 8.25C12.2473 8.25 12.7242 8.44754 13.0758 8.79918C13.4275 9.15081 13.625 9.62772 13.625 10.125V12C13.625 12.4973 13.4275 12.9742 13.0758 13.3258C12.7242 13.6775 12.2473 13.875 11.75 13.875C11.2527 13.875 10.7758 13.6775 10.4242 13.3258C10.0725 12.9742 9.875 12.4973 9.875 12ZM34.8477 26.2266L29.1148 30.9586L30.8633 38.0156C30.9078 38.1948 30.8984 38.3832 30.8363 38.557C30.7741 38.7309 30.662 38.8826 30.5141 38.993C30.3517 39.1126 30.1556 39.1775 29.9539 39.1781C29.789 39.1771 29.6274 39.1327 29.4852 39.0492L23 35.2453L16.5219 39.0586C16.362 39.1533 16.1777 39.1984 15.9922 39.1882C15.8067 39.1779 15.6284 39.1128 15.48 39.001C15.3316 38.8893 15.2197 38.7359 15.1586 38.5605C15.0975 38.3851 15.0899 38.1954 15.1367 38.0156L16.8852 30.9492L11.1523 26.2266C11.0076 26.1077 10.9018 25.9482 10.8486 25.7687C10.7953 25.5892 10.797 25.3978 10.8535 25.2193C10.91 25.0407 11.0187 24.8832 11.1655 24.767C11.3123 24.6508 11.4906 24.5812 11.6773 24.5672L19.2336 23.9836L22.1398 17.2547C22.2126 17.087 22.3327 16.9441 22.4855 16.8438C22.6384 16.7435 22.8172 16.6901 23 16.6901C23.1828 16.6901 23.3616 16.7435 23.5145 16.8438C23.6673 16.9441 23.7874 17.087 23.8602 17.2547L26.7664 23.9836L34.3227 24.5672C34.5094 24.5812 34.6877 24.6508 34.8345 24.767C34.9813 24.8832 35.09 25.0407 35.1465 25.2193C35.203 25.3978 35.2047 25.5892 35.1514 25.7687C35.0982 25.9482 34.9924 26.1077 34.8477 26.2266ZM36.125 12C36.125 12.4973 35.9275 12.9742 35.5758 13.3258C35.2242 13.6775 34.7473 13.875 34.25 13.875C33.7527 13.875 33.2758 13.6775 32.9242 13.3258C32.5725 12.9742 32.375 12.4973 32.375 12V10.125C32.375 9.62772 32.5725 9.15081 32.9242 8.79918C33.2758 8.44754 33.7527 8.25 34.25 8.25C34.7473 8.25 35.2242 8.44754 35.5758 8.79918C35.9275 9.15081 36.125 9.62772 36.125 10.125V12Z" fill="#EDEBEB"/>
-<defs>
-<linearGradient id="paint0_linear_646_1026" x1="0.5" y1="0.75" x2="52.4541" y2="40.3844" gradientUnits="userSpaceOnUse">
-<stop stop-color="#FFF75E"/>
-<stop offset="1" stop-color="#FDB833"/>
-</linearGradient>
-</defs>
-</svg>`;
-
 const svgString7 = `
 <svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g filter="url(#filter0_iiii_294_720)">
@@ -184,14 +172,11 @@ export function Main({ navigation }) {
       </View>
       <View style={styles.content}>
         <View style={styles.row}>    
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate("Adopt")}>
             <IconText text="입양" iconXml={svgString4} style={styles.subText} />
          </TouchableOpacity>
           <TouchableOpacity onPress={() => navigation.navigate("Store")}>
             <IconText text="펫 마켓" iconXml={svgString5} style={styles.subText} />
-          </TouchableOpacity>
-          <TouchableOpacity>
-            <IconText text="행사일정" iconXml={svgString6} style={styles.subText} />
           </TouchableOpacity>
         </View>
         <View style={[styles.row, styles.rowMargin]}>
@@ -202,7 +187,6 @@ export function Main({ navigation }) {
          <IconText text="산책" iconXml={svgString8} style={styles.featureText} />
         </TouchableOpacity>
         </View>
-        <Text style={styles.eventText}>행사 정보</Text>
       </View>
       <View style={styles.footer}>
         <View style={styles.navItem}>
@@ -216,8 +200,10 @@ export function Main({ navigation }) {
           </TouchableOpacity>
         </View>
         <View style={styles.navItem}>
+        <TouchableOpacity onPress={() => navigation.navigate("Community")}>
           <SvgXml xml={svgString2} width="36" height="36" style={styles.icon}/>
           <Text style={styles.navText}>게시판</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </View>
@@ -231,20 +217,35 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  header: {
-    flexDirection: 'row',
-    textAlign: 'center',
-    paddingHorizontal: 10,
-    marginTop: 30,
-  },
   icon2: {
     position: 'absolute',
     marginTop: 15,
   },
-  petTracker: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: 'rgba(0, 0, 0, 1)',
+  icon: {
+    alignItems: 'center',
+    marginBottom: 8,
+    left: 20,
+  },
+  featureText: {
+    fontSize: 20,
+    color: 'rgba(0, 0, 0, 0.7)',
+    paddingTop: 10,
+  },
+  subText: {
+    fontSize: 20,
+    color: 'rgba(0, 0, 0, 0.7)',
+    paddingTop: 10,
+  },
+  openButton: {
+    position: 'absolute',
+    top: 20,
+    left: 10,
+    padding: 10,
+    backgroundColor: '#ffffff',
+    borderRadius: 10,
+  },
+  openButtonText: {
+    color: 'black',
   },
   modalContainer: {
     flex: 1,
@@ -275,7 +276,7 @@ const styles = StyleSheet.create({
     width:  210, // 상단 선의 길이
     backgroundColor: 'rgba(0, 0, 0, 0.2)', // 상단 선의 색상 (희미하게)
     marginBottom: 20, // 상단 선과 내용 간의 간격
-    top: 120,
+    top: 130,
   },
   headerContainer: {
     flexDirection: 'row',
@@ -307,6 +308,9 @@ const styles = StyleSheet.create({
     position: 'absolute', // 좌측 상단 끝에 붙이기 위해 position 절대값으로 설정
     top: 100, // 상단에서 떨어진 거리
     left: 48,
+  },
+  icon: {
+    top: -5,
   },
   logoutText: {
     fontSize: 16,
@@ -344,51 +348,63 @@ const styles = StyleSheet.create({
     color: 'blue',
     marginTop: 20,
   },
-  title: {
+  header: {
     alignItems: 'center',
-    marginTop: 30,
-    borderBottomWidth: 1, 
-    borderBottomColor: 'rgba(0, 0, 0, 0.1)',
+    marginTop: 70,
+  },
+  petTracker: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: 'rgba(0, 0, 0, 1)',
+    top: -30,
   },
   text: {
     fontSize: 30,
     top: 50,
   },
+  subText1: {
+    fontSize: 20,
+    color: 'rgba(0, 0, 0, 0.7)',
+    marginVertical: 10,
+    top: -30,
+    left: -20,
+  },
+  subText2: {
+    fontSize: 20,
+    color: 'rgba(0, 0, 0, 0.7)',
+    marginVertical: 10,
+    top: -30,
+  },
+  subText3: {
+    fontSize: 20,
+    color: 'rgba(0, 0, 0, 0.7)',
+    marginVertical: 10,
+    top: -30,
+  },
   content: {
-    flexDirection: 'column',
     alignItems: 'center',
     marginVertical: 50,
   },
   row: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    width: '100%',
-    paddingHorizontal: 50,
-  },
-  row1: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    width: '100%',
-    paddingHorizontal: 90,
+    justifyContent: 'space-around',
+    width: '90%',
+    right: 20,
   },
   rowMargin: {
-    marginTop: 15,
+    marginTop: 20,
+    marginRight: 10,
   },
-  subText: {
-    fontSize: 20,
+  featureText1: {
+    fontSize: 18,
     color: 'rgba(0, 0, 0, 0.7)',
-    paddingTop: 10,
+    marginVertical: 10,
+    left: -20,
   },
-  featureText: {
-    fontSize: 20,
+  featureText2: {
+    fontSize: 18,
     color: 'rgba(0, 0, 0, 0.7)',
-    paddingTop: 10,
-  },
-  iconTextContainer: {
-    alignItems: 'center',
-    marginBottom: 10,
+    marginVertical: 10,
   },
   eventText: {
     fontSize: 16,
@@ -409,14 +425,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 10,
   },
-  icon: {
-    alignItems: 'center',
-    marginBottom: 8,
-  },
   navText: {
     fontSize: 18,
     color: 'rgba(0, 0, 0, 0.7)',
-    marginBottom: 15,
   },
 });
 

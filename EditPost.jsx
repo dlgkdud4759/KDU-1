@@ -1,68 +1,68 @@
-import React, { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert, KeyboardAvoidingView, ScrollView, Platform } from "react-native";
-import { SvgXml } from "react-native-svg";
+import React, { useState, useEffect } from "react";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
+import { firestore } from "../Firebase";
 import { Picker } from "@react-native-picker/picker";
-import { firestore } from "../Firebase"; // firebase.js에서 Firestore 가져오기
-import { collection, addDoc, serverTimestamp, query, where, getDocs } from "firebase/firestore"; // Firestore 관련 함수들 추가
-import { getAuth } from "firebase/auth"; // Firebase Authentication 가져오기
+import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { getAuth } from 'firebase/auth';
+import { SvgXml } from "react-native-svg";
 
 const svgStringBack = `
 <svg width="11" height="21" viewBox="0 0 11 21" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M9.74996 19.34C10.1139 19.7544 10.0737 20.3852 9.65996 20.75C9.24556 21.114 8.61471 21.0737 8.24996 20.66L0.249955 11.66C-0.0816908 11.2825 -0.0816908 10.7175 0.249955 10.34L8.24996 1.34C8.48059 1.05366 8.84975 0.916976 9.21124 0.984074C9.57274 1.05117 9.86826 1.31123 9.98078 1.66126C10.0933 2.01129 10.0047 2.39484 9.74996 2.66L2.33996 11L9.74996 19.34Z" fill="#111111"/>
 </svg>`;
 
-const Write = ({ navigation }) => {
+const EditPost = ({ route, navigation }) => {
+  const { postId } = route.params; // 게시물 ID 받아오기
+  const [post, setPost] = useState(null); // 게시물 데이터
   const [category, setCategory] = useState("");
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
 
-  const auth = getAuth(); // Firebase 인증 인스턴스
+  const auth = getAuth();
 
-  // 게시물 저장 함수
+  useEffect(() => {
+    const getPostData = async () => {
+      const docRef = doc(firestore, "posts", postId);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        const postData = docSnap.data();
+        setPost(postData);
+        setCategory(postData.category);
+        setTitle(postData.title);
+        setContent(postData.content);
+      } else {
+        Alert.alert("알림", "게시물을 찾을 수 없습니다.");
+      }
+    };
+
+    getPostData();
+  }, [postId]);
+
   const handleSubmit = async () => {
     if (!category || !title || !content) {
       Alert.alert("알림", "모든 필드를 채워주세요!");
       return;
     }
-
-    const user = auth.currentUser;
-    if (!user) {
-      Alert.alert("알림", "로그인 후 게시글을 작성해주세요.");
-      return;
-    }
-
+  
     try {
-      // pets 컬렉션에서 현재 로그인된 사용자의 userId 값 가져오기
-      const q = query(
-        collection(firestore, "pets"),
-        where("userId", "==", user.uid) // "userId"가 로그인된 사용자의 UID와 일치하는 문서 찾기
-      );
-      const querySnapshot = await getDocs(q);
-
-      if (querySnapshot.empty) {
-        Alert.alert("알림", "사용자 정보가 없습니다.");
-        return;
-      }
-
-      const petData = querySnapshot.docs[0].data(); // 첫 번째 문서 데이터 가져오기
-
-      // Firestore에 데이터 추가
-      await addDoc(collection(firestore, "posts"), {
+      const docRef = doc(firestore, "posts", postId);
+      await updateDoc(docRef, {
         category,
         title,
         content,
-        createdAt: serverTimestamp(),
-        authorUid: user.uid, // 작성자의 UID 추가
-        petOwnerId: petData.userId, // pets 컬렉션에서 가져온 userId 추가
+        updatedAt: new Date(), // 수정된 시간을 업데이트
       });
-
-      Alert.alert("성공", "게시글이 저장되었습니다!");
-      navigation.goBack();
+  
+      Alert.alert("성공", "게시물이 수정되었습니다!");
+      navigation.navigate('PostDetail', { postId }); // 수정된 게시물 상세 페이지로 이동
     } catch (error) {
-      console.error(error);
-      Alert.alert("오류", "저장에 실패했습니다.");
+      console.error("게시물 수정 실패:", error);
+      Alert.alert("오류", "게시물 수정에 실패했습니다.");
     }
   };
+  
+  if (!post) return null; // 데이터가 없으면 렌더링 하지 않음
 
   return (
     <KeyboardAvoidingView
@@ -75,7 +75,7 @@ const Write = ({ navigation }) => {
             <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
               <SvgXml xml={svgStringBack} width="24" height="24" />
             </TouchableOpacity>
-            <Text style={styles.headerText}>게시판 작성</Text>
+            <Text style={styles.headerText}>게시물 수정</Text>
           </View>
 
           <View style={styles.form}>
@@ -112,7 +112,7 @@ const Write = ({ navigation }) => {
           </View>
 
           <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-            <Text style={styles.submitButtonText}>작성 완료</Text>
+            <Text style={styles.submitButtonText}>수정 완료</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -192,4 +192,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Write;
+export default EditPost;

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, Modal, Image } from 'react-native';
+import { ScrollView, View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, Modal, Image } from 'react-native';
 import { firestore, auth } from '../Firebase'; // Firebase 설정 가져오기
 import { collection, addDoc, doc, updateDoc } from 'firebase/firestore'; // Firestore 관련 함수 임포트
 import { SvgXml } from 'react-native-svg';
@@ -70,7 +70,6 @@ export function Information1({ navigation }) {
   };
 
   const handleConfirm = async () => {
-    // 모든 필드가 입력되었는지 확인
     if (!name || !weight || !birthDate || !petType || !gender || !isNeutered) {
       Alert.alert("모든 필드를 채워주세요.");
       return; 
@@ -78,7 +77,6 @@ export function Information1({ navigation }) {
 
     const userId = auth.currentUser.uid;
 
-    // 반려동물 정보 객체 생성
     const petInfo = { 
       userId, 
       petType, 
@@ -90,17 +88,15 @@ export function Information1({ navigation }) {
     };
 
     try {
-      // 반려동물 정보 저장
       const docRef = await addDoc(collection(firestore, 'pets'), petInfo);
       console.log('반려동물 정보가 저장되었습니다:', petInfo, '문서 ID:', docRef.id);
       Alert.alert("정보가 저장되었습니다.");
 
-      // 사용자의 isInfoCompleted 필드를 true로 업데이트
       const userDoc = doc(firestore, "users", userId);
-      await updateDoc(userDoc, { isInfoCompleted: true }); // 필드 업데이트
+      await updateDoc(userDoc, { isInfoCompleted: true });
       console.log("사용자 정보 업데이트 완료: isInfoCompleted가 true로 설정되었습니다.");
 
-      navigation.navigate('Main'); // Main 화면으로 이동
+      navigation.navigate('Main');
     } catch (error) {
       console.error('정보 저장 중 오류 발생:', error);
       Alert.alert("정보 저장 실패", "다시 시도해 주세요.");
@@ -108,7 +104,7 @@ export function Information1({ navigation }) {
   };
 
   return (
-    <View style={styles.root}>
+    <ScrollView contentContainerStyle={styles.root}>
       <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
         <SvgXml xml={svgString6} width="24" height="24" style={styles.icon1}/>
       </TouchableOpacity>
@@ -128,8 +124,8 @@ export function Information1({ navigation }) {
       </View>
 
       <Modal visible={showImageUploader} animationType="slide">
-  <ProfileImageUploader onImageUploaded={handleImageUploaded} setShowImageUploader={setShowImageUploader} />
-</Modal>
+        <ProfileImageUploader onImageUploaded={handleImageUploaded} setShowImageUploader={setShowImageUploader} />
+      </Modal>
 
       <View style={styles.petTypeContainer}>
         <Text style={styles.label}>반려종</Text>
@@ -211,14 +207,13 @@ export function Information1({ navigation }) {
       <TouchableOpacity style={styles.confirmButton} onPress={handleConfirm}>
         <Text style={styles.confirmButtonLabel}>확인</Text>
       </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   root: {
-    width: '100%',
-    height: '100%',
+    flexGrow: 1, // 콘텐츠가 화면 크기에 맞게 조정되도록
     backgroundColor: 'rgba(255, 255, 255, 1)',
     padding: 20,
   },
