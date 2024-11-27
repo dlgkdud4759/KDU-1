@@ -1,0 +1,55 @@
+/* 상품 목록 (카드형) */
+.product-list {
+    margin: 20px;
+  }
+  
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  
+  .product-card {
+    border: 1px solid #ccc;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    transition: transform 0.3s;
+  }
+  
+  .product-card:hover {
+    transform: scale(1.05);
+  }
+  
+  .product-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+  }
+  
+  .product-info h3 {
+    font-size: 18px;
+    font-weight: bold;
+  }
+  
+  .product-info p {
+    font-size: 14px;
+    color: #777;
+  }
+  
+  .details-btn {
+    background-color: #4caf50;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 10px;
+  }
+  
+  .details-btn:hover {
+    background-color: #45a049;
+  }
+  
