@@ -13,6 +13,7 @@ import ProfileImageUploader from "./src/components/ProfileImageUploader";
 import Store from './src/components/Store';
 import Checkout from './src/components/Checkout';
 import MapComponent from './src/components/MapComponent';
+import ReviewForm from './src/components/ReviewForm';
 import Product from './src/components/Product';
 import WalkPage from './src/components/WalkPage';
 import Walk from './src/components/walk';
@@ -35,6 +36,7 @@ export default function App() {
         <Stack.Screen name="Store" component={Store} options={{ headerShown: false }} />
         <Stack.Screen name="Checkout" component={Checkout} options={{ headerShown: false }} /> 
         <Stack.Screen name="MapComponent" component={MapComponent} options={{ headerShown: false }} />
+        <Stack.Screen name="ReviewForm" component={ReviewForm} options={{ headerShown: false }}/>
         <Stack.Screen name="Product" component={Product} options={{ headerShown: false }} />
         
         <Stack.Screen name="Walk" component={Walk} options={{ headerShown: false }} />
