@@ -1,14 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, FlatList, Animated } from 'react-native';
 import { firestore, auth } from '../Firebase';
+import MapView, { Polyline } from 'react-native-maps';
 import { collection, query, where, getDocs } from 'firebase/firestore';
+import { SvgXml } from 'react-native-svg';
+import { Toggle } from './SvgIcon';
 
 const WalkLog = () => {
     const [walkLogs, setWalkLogs] = useState([]);
+    const [userName, setUserName] = useState('');
     const [totalCount, setTotalCount] = useState(0);
     const [totalDistance, setTotalDistance] = useState(0);
     const [totalDuration, setTotalDuration] = useState('00:00');
     const [expandedLogIndex, setExpandedLogIndex] = useState(null);
+    const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
+    const [selectedYear, setSelectedYear] = useState(new Date().getFullYear()); // 현재 년도
+    const [availableYears, setAvailableYears] = useState([]); // 데이터가 있는 년도
+    const [isYearPickerVisible, setIsYearPickerVisible] = useState(false);
+    const [isFilterVisible, setIsFilterVisible] = useState(false);
+    const [heightAnim] = useState(new Animated.Value(0));
+    const [mapRegion, setMapRegion] = useState(null);
+    const [path, setPath] = useState([]);
 
     const fetchWalkLogs = async () => {
         try {
@@ -16,108 +28,181 @@ const WalkLog = () => {
 
             if (!currentUser) {
                 console.log("No user is logged in.");
-                setWalkLogs([]);
-                setTotalCount(0);
-                setTotalDistance(0);
-                setTotalDuration("00:00");
+                resetState();
                 return;
             }
 
             const userId = currentUser.uid;
-            console.log("Fetching logs for user:", userId);
 
-            // Firestore에서 해당 유저의 walks 컬렉션 필터링
             const logsRef = collection(firestore, "walks");
             const userLogsQuery = query(logsRef, where("userId", "==", userId));
             const snapshot = await getDocs(userLogsQuery);
 
-            // 데이터가 없을 경우 초기화
             if (snapshot.empty) {
                 console.log("No walk logs found.");
-                setWalkLogs([]);
-                setTotalCount(0);
-                setTotalDistance(0);
-                setTotalDuration("00:00");
+                resetState();
                 return;
             }
 
-            // Firestore 데이터 매핑 및 필드 유효성 검사
             const logs = snapshot.docs.map((doc) => {
                 const data = doc.data();
                 return {
                     distance: (data.distance || 0) / 1000,
                     startTime: data.startTime ? new Date(data.startTime.seconds * 1000) : null,
                     endTime: data.endTime ? new Date(data.endTime.seconds * 1000) : null,
+                    path: data.path || [],
                 };
             });
-            console.log("Fetched Logs: ", logs);
 
-            // 데이터를 startTime을 기준으로 내림차순으로 정렬
             const sortedLogs = logs.sort((a, b) => {
                 if (!a.startTime || !b.startTime) return 0;
-                return b.startTime - a.startTime; // 내림차순 정렬
+                return b.startTime - a.startTime;
             });
 
-            setWalkLogs(sortedLogs); // 모든 산책 기록을 상태에 저장
+            setWalkLogs(sortedLogs);
 
-            // 현재 월 기준으로 로그 필터링
-            const currentMonth = new Date().getMonth(); // 현재 월 (0부터 시작)
-            const filteredLogs = logs.filter(
-                (log) => log.startTime && log.startTime.getMonth() === currentMonth
-            );
-            console.log("Filtered Logs (Current Month): ", filteredLogs);
+            // 데이터에서 사용 가능한 년도 추출
+            const years = [...new Set(logs.map((log) => log.startTime?.getFullYear()))];
+            setAvailableYears(years);
 
-            // 총 거리 및 시간 계산
-            let distanceSum = 0;
-            let durationSum = 0;
-
-            filteredLogs.forEach((log) => {
-                // 거리 계산
-                distanceSum += parseFloat(log.distance) || 0; // distance 값이 없으면 0으로 처리
-
-                // startTime과 endTime을 기반으로 duration 계산
-                if (log.startTime && log.endTime) {
-                    const start = new Date(log.startTime); // startTime을 Date 객체로 변환
-                    const end = new Date(log.endTime); // endTime을 Date 객체로 변환
-                    durationSum += Math.floor((end - start) / (1000 * 60)); // 분 단위로 계산
-                } else if (log.startTime) {
-                    const start = new Date(log.startTime);
-                    const end = new Date(); // endTime이 없으면 현재 시간을 기준으로 사용
-                    durationSum += Math.floor((end - start) / (1000 * 60)); // 분 단위 계산
-                }
-            });
-
-            // 총 산책 횟수
-            setTotalCount(filteredLogs.length);
-
-            // 총 거리 (소수점 첫째 자리까지)
-            setTotalDistance(distanceSum.toFixed(1));
-
-            // 총 시간 포맷팅 (시간:분)
-            const totalHours = Math.floor(durationSum / 60);
-            const totalMinutes = durationSum % 60;
-            setTotalDuration(
-                `${totalHours.toString().padStart(2, "0")}:${totalMinutes.toString().padStart(2, "0")}`
-            );
+            filterLogsByDate(logs, selectedYear, selectedMonth);
         } catch (error) {
             console.error("Error fetching walk logs: ", error);
-            // 에러 발생 시 상태 초기화
-            setWalkLogs([]);
-            setTotalCount(0);
-            setTotalDistance(0);
-            setTotalDuration("00:00");
+            resetState();
+        }
+    };
+
+    const toggleExpandLog = (index) => {
+        if (expandedLogIndex === index) {
+            setExpandedLogIndex(null);
+            setPath([]);
+            setMapRegion(null);
+        } else {
+            const selectedLog = walkLogs[index];
+            setExpandedLogIndex(index);
+            setPath(selectedLog.path);
+
+            if (selectedLog.path && selectedLog.path.length > 0) {
+                // 중심 좌표 계산
+                const latitudes = selectedLog.path.map((point) => point.latitude);
+                const longitudes = selectedLog.path.map((point) => point.longitude);
+
+                const centerLatitude =
+                    latitudes.reduce((sum, lat) => sum + lat, 0) / latitudes.length;
+                const centerLongitude =
+                    longitudes.reduce((sum, lng) => sum + lng, 0) / longitudes.length;
+
+                setMapRegion({
+                    latitude: centerLatitude,
+                    longitude: centerLongitude,
+                    latitudeDelta: 0.01,
+                    longitudeDelta: 0.01,
+                });
+            }
+        }
+    };
+
+    // 필터링 함수
+    const filterLogsByDate = (logs, year, month) => {
+        const filteredLogs = logs.filter(
+            (log) =>
+                log.startTime &&
+                log.startTime.getFullYear() === year &&
+                log.startTime.getMonth() + 1 === month
+        );
+
+        let distanceSum = 0;
+        let durationSum = 0;
+
+        filteredLogs.forEach((log) => {
+            distanceSum += parseFloat(log.distance) || 0;
+
+            if (log.startTime && log.endTime) {
+                const start = new Date(log.startTime);
+                const end = new Date(log.endTime);
+                durationSum += Math.floor((end - start) / (1000 * 60));
+            }
+        });
+
+        setTotalCount(filteredLogs.length);
+        setTotalDistance(distanceSum.toFixed(1));
+
+        const totalHours = Math.floor(durationSum / 60);
+        const totalMinutes = durationSum % 60;
+        setTotalDuration(
+            `${totalHours.toString().padStart(2, "0")}:${totalMinutes.toString().padStart(2, "0")}`
+        );
+    };
+
+    // 상태 초기화 함수
+    const resetState = () => {
+        setWalkLogs([]);
+        setTotalCount(0);
+        setTotalDistance(0);
+        setTotalDuration("00:00");
+    };
+
+    // 년도 변경 핸들러
+    const handleYearChange = (year) => {
+        setSelectedYear(year);
+        setIsYearPickerVisible(false);
+        filterLogsByDate(walkLogs, year, selectedMonth);
+    };
+
+    // 월 변경 핸들러
+    const handleMonthChange = (month) => {
+        setSelectedMonth(month);
+        filterLogsByDate(walkLogs, selectedYear, month);
+    };
+
+    const toggleFilterVisibility = () => {
+        setIsFilterVisible((prevState) => !prevState);
+
+        // 애니메이션 시작
+        Animated.timing(heightAnim, {
+            toValue: isFilterVisible ? 0 : 180,
+            duration: 300,
+            useNativeDriver: false,
+        }).start();
+    };
+
+    const fetchUserName = async () => {
+        const userId = auth.currentUser?.uid;
+        console.log("현재 유저 ID:", userId); // 유저 ID 확인
+        if (!userId) {
+            console.log("로그인되지 않은 사용자입니다.");
+            return;
+        }
+
+        try {
+            // pets 컬렉션에서 특정 userId에 해당하는 데이터를 가져오기 위해 쿼리 생성
+            const petsCollection = collection(firestore, 'pets');
+            const q = query(petsCollection, where("userId", "==", userId));
+
+            // 쿼리를 실행하여 해당 유저의 데이터 가져오기
+            const querySnapshot = await getDocs(q);
+            if (querySnapshot.empty) {
+                return;
+            }
+
+            // 유저 정보가 존재하면 이름을 설정
+            querySnapshot.forEach(doc => {
+                setUserName(doc.data().name);
+            });
+
+        } catch (error) {
+            Alert.alert('유저 정보를 불러오지 못했습니다.', error.message);
+            console.error('유저 이름을 가져오는 중 오류 발생:', error);
         }
     };
 
     useEffect(() => {
-        fetchWalkLogs();
+        fetchUserName();
     }, []);
 
-    const currentMonthName = new Date().toLocaleString('ko-KR', { month: 'long' });
-
-    const toggleExpandLog = (index) => {
-        setExpandedLogIndex(index === expandedLogIndex ? null : index);
-    };
+    useEffect(() => {
+        fetchWalkLogs();
+    }, []);
 
     const formatDuration = (duration) => {
         const hours = Math.floor(duration / 60); // 1시간을 계산
@@ -142,7 +227,7 @@ const WalkLog = () => {
     return (
         <View style={styles.container}>
             <View style={styles.header}>
-                <Text style={styles.title}>{`${currentMonthName} 한 달 간의 산책 기록은?`}</Text>
+                <Text style={styles.title}>{`${userName}의 ${selectedMonth}월 한 달간의 산책 기록은?`}</Text>
                 <View style={styles.stats}>
                     <Text style={styles.statText}>{totalCount}{"\n"}총 횟수(회)</Text>
                     <Text style={styles.statText}>{totalDistance}{"\n"}총 거리 (km)</Text>
@@ -150,15 +235,92 @@ const WalkLog = () => {
                 </View>
             </View>
 
-            {/* 여기에 11월 12월 월 단위를 골라서 볼 수 있도록 하는 필터 하나를 만들고 싶어 */}
+            <TouchableOpacity
+                style={styles.filterToggleButton}
+                onPress={toggleFilterVisibility}
+            >
+                <Text style={styles.filterToggleButtonText}>
+                    {isFilterVisible ? (
+                        <SvgXml xml={Toggle} style={styles.Toggle1} />
+                    ) : (
+                        <SvgXml xml={Toggle} style={styles.Toggle2} />
+                    )}
+                </Text>
+            </TouchableOpacity>
+
+            <Animated.View
+                style={[styles.filterSection, { height: heightAnim }]}
+            >
+                {isFilterVisible && (
+                    <View style={styles.filterSection}>
+                        <TouchableOpacity
+                            style={styles.yearButton}
+                            onPress={() => setIsYearPickerVisible(true)}
+                        >
+                            <Text style={styles.yearButtonText}>{selectedYear}년</Text>
+                        </TouchableOpacity>
+                        <Modal
+                            visible={isYearPickerVisible}
+                            transparent={true}
+                            animationType="slide"
+                        >
+                            <View style={styles.modalContainer}>
+                                <FlatList
+                                    data={availableYears}
+                                    keyExtractor={(item) => item.toString()}
+                                    renderItem={({ item }) => (
+                                        <TouchableOpacity
+                                            style={styles.yearOption}
+                                            onPress={() => handleYearChange(item)}
+                                        >
+                                            <Text style={styles.yearOptionText}>{item}년</Text>
+                                        </TouchableOpacity>
+                                    )}
+                                />
+                                <TouchableOpacity
+                                    style={styles.modalCloseButton}
+                                    onPress={() => setIsYearPickerVisible(false)}
+                                >
+                                    <Text style={styles.modalCloseText}>닫기</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </Modal>
+
+                        <View style={styles.filterContainer}>
+                            {[...Array(12)].map((_, i) => (
+                                <TouchableOpacity
+                                    key={i}
+                                    style={[
+                                        styles.filterButton,
+                                        selectedMonth === i + 1 && styles.activeFilterButton,
+                                    ]}
+                                    onPress={() => handleMonthChange(i + 1)}
+                                >
+                                    <Text
+                                        style={[
+                                            styles.filterText,
+                                            selectedMonth === i + 1 && styles.activeFilterText,
+                                        ]}
+                                    >
+                                        {i + 1}월
+                                    </Text>
+                                </TouchableOpacity>
+                            ))}
+                        </View>
+                    </View>
+                )}
+            </Animated.View>
 
             <ScrollView style={styles.logList}>
                 {walkLogs.length > 0 ? (
-                    walkLogs.map((log, index) => (
-                        <View key={index}>
+                    walkLogs
+                        .filter((log) => log.startTime && log.startTime.getFullYear() === selectedYear && log.startTime.getMonth() + 1 === selectedMonth)
+                        .map((log, index) => (
                             <TouchableOpacity
+                                key={index}
                                 style={styles.logItem}
                                 onPress={() => toggleExpandLog(index)}
+                                activeOpacity={0.5}
                             >
                                 <Text style={styles.logText}>
                                     {log.startTime?.toLocaleDateString('ko-KR', {
@@ -169,13 +331,30 @@ const WalkLog = () => {
                                     {' '}
                                     {formatWalkTime(log.startTime, log.endTime)}
                                 </Text>
-                                <Text style={styles.logDetails}>
-                                    거리 <Text style={styles.logDetails1}>{log.distance?.toFixed(1) || 0}km{"  "}</Text>
-                                    시간 <Text style={styles.logDetails1}>{formatDuration(log.endTime && log.startTime ? (log.endTime - log.startTime) / 1000 / 60 : 0)}</Text>
-                                </Text>
+                                {expandedLogIndex === index && (
+                                    <Animated.View style={styles.mapContainer}>
+                                        <MapView
+                                            style={styles.map}
+                                            initialRegion={mapRegion}
+                                        >
+                                            <Polyline
+                                                coordinates={path}
+                                                strokeWidth={3}
+                                                strokeColor="#FFA86B"
+                                            />
+                                        </MapView>
+                                    </Animated.View>
+                                )}
+                                <View style={styles.logDetailsContainer}>
+                                    <Text style={styles.logDetails}>
+                                        거리 <Text style={styles.logDetails1}>{log.distance?.toFixed(1) || 0}km</Text>
+                                    </Text>
+                                    <Text style={styles.logDetailsRight}>
+                                        시간 <Text style={styles.logDetails1}>{formatDuration(log.endTime && log.startTime ? (log.endTime - log.startTime) / 1000 / 60 : 0)}</Text>
+                                    </Text>
+                                </View>
                             </TouchableOpacity>
-                        </View>
-                    ))
+                        ))
                 ) : (
                     <Text style={styles.noDataText}>산책 기록이 없습니다.</Text>
                 )}
@@ -185,6 +364,14 @@ const WalkLog = () => {
 };
 
 const styles = StyleSheet.create({
+    mapContainer: {
+        height: 250,
+        marginVertical: 10,
+    },
+    map: {
+        flex: 1,
+        borderRadius: 10,
+    },
     container: {
         flex: 1,
         backgroundColor: '#fff',
@@ -195,7 +382,7 @@ const styles = StyleSheet.create({
         borderBottomColor: '#ddd',
     },
     title: {
-        fontSize: 18,
+        fontSize: 20,
         fontWeight: 'bold',
         textAlign: 'center',
         color: '#E47513',
@@ -210,6 +397,105 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         color: '#E47513',
         fontWeight: 'bold',
+    },
+    Toggle1: {
+        transform: [{ rotate: '270deg' }],
+    },
+    Toggle2: {
+        transform: [{ rotate: '90deg' }],
+    },
+    filterToggleButton: {
+        marginTop: 5,
+        borderRadius: 5,
+        marginBottom: 5,
+        alignItems: 'center'
+    },
+    filterToggleButtonText: {
+        fontSize: 16,
+        color: '#000'
+    },
+    yearOption: {
+        padding: 15,
+        top: 50,
+        backgroundColor: '#fff',
+        marginVertical: 5,
+        borderRadius: 5,
+        width: 200,
+        alignItems: 'center',
+    },
+    yearOptionText: {
+        fontSize: 18,
+        color: '#333',
+        fontWeight: 'bold',
+    },
+    yearButton: {
+        marginTop: 10,
+        padding: 10,
+        backgroundColor: '#FFA86B',
+        borderWidth: 1,
+        borderColor: '#E47513',
+        borderRadius: 10,
+        width: '80%',
+        marginLeft: '10%',
+        shadowOpacity: 0.3,
+        shadowOffset: {
+            height: 1,
+        }
+    },
+    yearButtonText: {
+        color: '#fff',
+        fontSize: 16,
+        textAlign: 'center',
+        fontWeight: 'bold',
+    },
+    modalContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    modalCloseButton: {
+        marginTop: 20,
+        paddingLeft: '10%',
+        paddingRight: '10%',
+        padding: 12,
+        backgroundColor: '#FFA86B',
+        borderRadius: 10,
+        top: -30,
+    },
+    modalCloseText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    filterContainer: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        marginTop: 20,
+        flexWrap: 'wrap',
+    },
+    filterButton: {
+        padding: 10,
+        margin: 5,
+        borderWidth: 1,
+        borderRadius: 10,
+        borderColor: '#ccc',
+    },
+    activeFilterButton: {
+        backgroundColor: '#FFA86B',
+        borderColor: '#E47513',
+    },
+    filterText: {
+        color: '#495507',
+        fontWeight: '500',
+    },
+    activeFilterText: {
+        color: '#FFFFFF'
+    },
+    logList: {
+        padding: 16,
+        backgroundColor: '#FAFAFB',
+        zIndex: 1,
     },
     logItem: {
         padding: 16,
@@ -227,19 +513,29 @@ const styles = StyleSheet.create({
         color: '#495057',
         marginBottom: 2,
     },
+    logDetailsContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginVertical: 5,
+    },
     logDetails: {
         fontSize: 14,
         marginTop: 4,
         fontWeight: 'bold',
         color: '#E47513',
     },
+    logDetailsRight: {
+        fontSize: 14,
+        marginTop: 4,
+        fontWeight: 'bold',
+        color: '#E47513',
+        textAlign: 'right',
+    },
     logDetails1: {
         fontSize: 14,
         fontWeight: 'bold',
         color: '#FFA86B',
-    },
-    logList: {
-        padding: 16,
     },
 });
 

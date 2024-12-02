@@ -110,8 +110,6 @@ const styles = StyleSheet.create({
         borderBottomColor: '#ABC4FF',
         borderBottomWidth: 3,
     },
-    icon1: {
-    },
     selectedTab: {
         flexDirection: 'row',
     },

@@ -53,7 +53,7 @@ const Walk = () => {
         try {
             const auth = getAuth(); // Firebase Authentication 가져오기
             const userId = auth.currentUser?.uid; // 현재 로그인된 사용자 ID 가져오기
-    
+
             if (!userId) {
                 Alert.alert('로그인이 필요합니다.', '로그인 후 다시 시도해주세요.');
                 return;
@@ -62,7 +62,7 @@ const Walk = () => {
             const walksCollection = collection(firestore, 'walks');
             const docRef = await addDoc(walksCollection, { ...walkData, userId });
             console.log('Walk data saved successfully with ID:', docRef.id);
-            
+
             // 문서 조회 (getDoc)
             const docSnapshot = await getDoc(docRef);
             if (docSnapshot.exists()) {
@@ -70,7 +70,7 @@ const Walk = () => {
             } else {
                 console.log('No such document!');
             }
-            
+
             console.log('Walk data saved successfully with ID:', docRef.id);
             Alert.alert('Walk data saved successfully!');
         } catch (error) {
@@ -182,7 +182,7 @@ const Walk = () => {
         <View style={styles.container}>
             <MapView style={styles.map} region={region} showsUserLocation followUserLocation>
                 {/* 산책 경로를 Polyline으로 표시 */}
-                {walkPath.length > 1 && (
+                {isWalking && walkPath.length > 1 && (
                     <Polyline
                         coordinates={walkPath}
                         strokeColor="#ABC4FF"
