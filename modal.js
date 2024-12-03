@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, View, Image, Text, StyleSheet, TextInput, TouchableOpacity, Alert, PanResponder, Animated, ScrollView, Dimensions, TouchableWithoutFeedback, Keyboard } from 'react-native';
-import { collection, query, where, getDocs, addDoc, deleteDoc, doc } from 'firebase/firestore';
+import { Modal, View, Image, Text, StyleSheet, TouchableOpacity, Alert, Animated, ScrollView, Dimensions, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import { collection, query, where, getDocs, deleteDoc, doc } from 'firebase/firestore';
 import { firestore, auth } from '../Firebase';
 import { useNavigation } from '@react-navigation/native';
-import ReviewForm from './ReviewForm';
+import { SvgXml } from 'react-native-svg';
+import { Review } from './SvgIcon';
 
 const formatDate = (date) => {
   const options = {
@@ -72,7 +73,7 @@ const ModalComponent = ({ place, onClose }) => {
     try {
       const reviewsQuery = query(
         reviewsCollection,
-        where('placeId', '==', place.placeId)
+        where('placeId', '==', place.placeId),
       );
       const querySnapshot = await getDocs(reviewsQuery);
       console.log("가져온 리뷰 수:", querySnapshot.size);
@@ -86,6 +87,7 @@ const ModalComponent = ({ place, onClose }) => {
           ...doc.data(),
         };
       });
+
       setReviews(fetchedReviews);
     } catch (error) {
       console.error('리뷰 데이터를 가져오는 중 오류 발생:', error);
@@ -179,7 +181,8 @@ const ModalComponent = ({ place, onClose }) => {
 
         {/* 리뷰 작성 버튼 클릭 시 ReviewForm 페이지로 이동 */}
         <TouchableOpacity style={styles.ReviewButton} onPress={handleNavigateToReviewForm}>
-          <Text style={styles.ReviewForm}>리뷰 작성</Text>
+          <SvgXml xml={Review} width={18} height={18} />
+          <Text style={styles.ReviewForm}> 리뷰 작성</Text>
         </TouchableOpacity>
 
         {/* 작성된 리뷰 표시 (스크롤 가능) */}
@@ -276,6 +279,7 @@ const styles = StyleSheet.create({
   },
   ReviewButton: {
     marginLeft: 'auto',
+    flexDirection: 'row',
   },
   ReviewForm: {
     fontSize: 14,
