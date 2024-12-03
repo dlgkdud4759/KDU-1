@@ -200,9 +200,11 @@ const ModalComponent = ({ place, onClose }) => {
                     <View>
                       <Text style={styles.userName}>{item.userName}</Text>
                     </View>
-                    <TouchableOpacity onPress={() => handleDeleteReview(item.id, item.userId)} style={styles.delete}>
-                      <Text style={{ color: 'red' }}>삭제</Text>
-                    </TouchableOpacity>
+                    {item.userId === auth.currentUser?.uid && (
+                      <TouchableOpacity onPress={() => handleDeleteReview(item.id, item.userId)} style={styles.delete}>
+                        <Text style={{ color: 'red' }}>삭제</Text>
+                      </TouchableOpacity>
+                    )}
                   </View>
                   <Text style={styles.reviewText}>{item.text}</Text>
                   <Text style={styles.reviewDate}>{formatDate(new Date(item.createdAt))}</Text>
